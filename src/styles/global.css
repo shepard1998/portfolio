@@ -1,1 +1,139 @@
 @import 'tailwindcss';
+
+/* Dark mode follows the `data-theme` attribute set on <html> by the theme script. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ---------- Color tokens ("Electric" direction) ---------- */
+:root {
+  color-scheme: light;
+  --bg: #f4f4fb;
+  --fg: #0a0c1c;
+  --muted: #545977;
+  --line: #d8daef;
+  --surface: #ffffff;
+  --accent: #2f4bff;
+  --accent-ink: #ffffff;
+  --accent-text: #2f4bff;
+  --folder-back: #e2e5ff;
+  --folder-front: rgb(47 75 255 / 0.9);
+  --folder-front-ink: #ffffff;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #07080f;
+  --fg: #eef0ff;
+  --muted: #8d92b2;
+  --line: #1f2344;
+  --surface: #0f1122;
+  --accent: #5b78ff;
+  --accent-ink: #07080f;
+  --accent-text: #7d93ff;
+  --folder-back: #161a3a;
+  --folder-front: rgb(91 120 255 / 0.88);
+  --folder-front-ink: #07080f;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-text: var(--accent-text);
+  --color-folder-back: var(--folder-back);
+  --color-folder-front: var(--folder-front);
+  --color-folder-front-ink: var(--folder-front-ink);
+
+  --font-display: var(--font-unbounded), sans-serif;
+  --font-sans: var(--font-jetbrains-mono), monospace;
+  --font-mono: var(--font-jetbrains-mono), monospace;
+}
+
+@theme {
+  /* Fluid type scale: display sizes grow with the viewport. */
+  --text-hero: clamp(2.5rem, 10vw, 9rem);
+  --text-hero--line-height: 0.95;
+  --text-hero--letter-spacing: -0.04em;
+  --text-headline: clamp(2rem, 5.5vw, 4.5rem);
+  --text-headline--line-height: 1;
+  --text-headline--letter-spacing: -0.035em;
+  --text-title: clamp(1.25rem, 2.6vw, 1.875rem);
+  --text-title--line-height: 1.1;
+  --text-title--letter-spacing: -0.02em;
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.08em;
+
+  --radius-card: 1.25rem;
+
+  /* Motion: snappy springs for interactions, expo-out for entrances. */
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-flip: cubic-bezier(0.5, 0, 0.2, 1.15);
+
+  --animate-rise: rise 560ms var(--ease-out-expo) both;
+  --animate-draw-y: draw-y 900ms var(--ease-out-expo) both;
+
+  @keyframes rise {
+    from {
+      transform: translateY(110%) rotate(4deg);
+    }
+  }
+
+  @keyframes draw-y {
+    from {
+      transform: scaleY(0);
+    }
+  }
+}
+
+@layer base {
+  :root {
+    --duration-fast: 180ms;
+    --duration-base: 320ms;
+    --duration-slow: 560ms;
+  }
+
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+  }
+
+  ::selection {
+    @apply bg-accent text-accent-ink;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-4 outline-accent-text;
+  }
+
+  /* The theme switch is animated with a circular reveal (see src/lib/view-transition.ts). */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  /* Scroll-reveal elements start hidden only when JS motion is available (see ThemeScript). */
+  .motion-ok [data-reveal]:not([data-revealed]) {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-delay: 0ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility label {
+  @apply font-mono text-label text-muted uppercase;
+}
