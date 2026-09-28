@@ -7,18 +7,21 @@ interface Props {
   delay?: number;
   /** Delay in ms between consecutive characters. */
   step?: number;
+  /** Start when the text scrolls into view instead of on page load. */
+  onView?: boolean;
   class?: string;
 }
 
-const { text, delay = 80, step = 24, class: className } = Astro.props;
+const { text, delay = 80, step = 24, onView = false, class: className } = Astro.props;
 const words = splitText(text);
 ---
 
 <!--
-  Characters rise into view on load (CSS only, no JavaScript). Screen readers get the plain
-  text from the visually hidden copy; the per-character spans are hidden from them.
+  Characters rise into view on load (CSS only). With `onView`, the animation waits until the
+  text enters the viewport (src/lib/reveal.ts marks it). Screen readers get the plain text from
+  the visually hidden copy; the per-character spans are hidden from them.
 -->
-<span class:list={['split-text', className]}>
+<span class:list={['split-text', className]} data-split-view={onView ? '' : undefined}>
   <span class="sr-only">{text}</span>
   {words.map((word) => (
     <span class="word" aria-hidden="true">
@@ -54,6 +57,9 @@ const words = splitText(text);
     transition:
       transform var(--duration-fast) var(--ease-spring),
       color var(--duration-fast);
+  }
+  :global(.motion-ok) .split-text[data-split-view]:not([data-revealed]) .char {
+    animation-play-state: paused;
   }
   .char:hover {
     color: var(--accent-text);

@@ -1,0 +1,40 @@
+---
+import ProjectFolder from './ProjectFolder.astro';
+import SplitText from './SplitText.astro';
+import { getProjects } from '../data/projects';
+import { getLocaleFromPath, useTranslations } from '../i18n/utils';
+
+const locale = getLocaleFromPath(Astro.url.pathname);
+const t = useTranslations(locale);
+const projects = await getProjects(locale);
+---
+
+<section id="projects" class="scroll-mt-16 border-t border-line">
+  <div class="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 lg:py-28">
+    <header class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-end">
+      <div class="grid gap-4">
+        <p class="label" data-reveal="fade">
+          {t('projects.eyebrow')}
+        </p>
+        <h2 class="font-display text-headline font-extrabold">
+          <SplitText text={t('projects.title')} onView />
+        </h2>
+      </div>
+      <p class="text-muted" data-reveal>
+        {t('projects.intro')}
+      </p>
+    </header>
+
+    <ul
+      class="grid gap-x-8 gap-y-14 pt-4 sm:grid-cols-2 lg:grid-cols-3"
+      data-reveal
+      data-reveal-stagger
+    >
+      {projects.map((project, index) => (
+        <li>
+          <ProjectFolder project={project} index={index} />
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

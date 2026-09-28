@@ -1,0 +1,196 @@
+---
+import ProjectPreview from './ProjectPreview.astro';
+import type { Project } from '../data/projects';
+import { getLocaleFromPath, localizePath, useTranslations } from '../i18n/utils';
+import { caseNumber } from '../lib/projects';
+
+interface Props {
+  project: Project;
+  index: number;
+}
+
+const { project, index } = Astro.props;
+const locale = getLocaleFromPath(Astro.url.pathname);
+const t = useTranslations(locale);
+const href = localizePath(`/projects/${project.slug}`, locale);
+const { title, year, role, summary, stack, sample } = project.data;
+---
+
+<!--
+  An open folder: title and summary on the back panel, the preview as a sheet sticking out,
+  and a glass front flap with the stack. Opening (hover, keyboard focus, or scrolling it to the middle of the screen on
+  touch devices) tilts the flap forward and lifts the sheet. The whole folder links to the
+  project page.
+-->
+<a href={href} class="folder" aria-label={t('projects.openLabel', { title })} data-folder>
+  <span class="back">
+    <span class="tab label">{t('projects.case', { number: caseNumber(index) })}</span>
+    <span class="flex items-start justify-between gap-3">
+      <span class="font-display text-title font-bold">{title}</span>
+      {sample && <span class="sample">{t('projects.sample')}</span>}
+    </span>
+    <span class="mt-1 block font-mono text-xs opacity-75">
+      {year} · {role}
+    </span>
+    <span class="mt-3 line-clamp-3 block text-sm leading-relaxed">{summary}</span>
+  </span>
+
+  <span class="sheet">
+    <ProjectPreview project={project} index={index} mode="folder" />
+  </span>
+
+  <span class="front">
+    <span class="flex flex-wrap gap-1.5">
+      {stack.slice(0, 4).map((tech) => (
+        <span class="chip">{tech}</span>
+      ))}
+    </span>
+    <span class="flex items-end justify-between gap-3">
+      <span class="label text-current!">{t('projects.open')}</span>
+      <span class="arrow" aria-hidden="true">
+        ↗
+      </span>
+    </span>
+  </span>
+</a>
+
+<style>
+  .folder {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    perspective: 1200px;
+    color: var(--fg);
+  }
+
+  .back {
+    position: absolute;
+    inset: 7% 0 0;
+    display: block;
+    padding: 1.25rem 1.25rem 0;
+    background: var(--folder-back);
+    border-radius: 0 var(--radius-card) var(--radius-card) var(--radius-card);
+  }
+  .tab {
+    position: absolute;
+    left: 0;
+    bottom: 100%;
+    display: flex;
+    align-items: center;
+    width: 42%;
+    height: 2.1rem;
+    padding-inline: 1.25rem;
+    background: var(--folder-back);
+    border-radius: var(--radius-card) 1.75rem 0 0;
+    color: var(--fg);
+  }
+
+  .sample {
+    flex: none;
+    padding: 0.15rem 0.55rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+  }
+  /* Stack chips live on the glass flap, so the preview sheet never covers them. */
+  .chip {
+    padding: 0.15rem 0.55rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .sheet {
+    position: absolute;
+    left: 7%;
+    right: 7%;
+    top: 54%;
+    display: block;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    box-shadow: 0 18px 40px rgb(7 8 15 / 0.35);
+    transform: translateY(0) rotate(-1.5deg);
+    transition: transform 520ms var(--ease-spring);
+  }
+
+  .front {
+    position: absolute;
+    inset: auto 0 0;
+    height: 36%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.1rem 1.25rem 1rem;
+    background: var(--folder-front);
+    color: var(--folder-front-ink);
+    border-radius: var(--radius-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transform-origin: 50% 100%;
+    transform: rotateX(-10deg);
+    transition: transform 520ms var(--ease-spring);
+  }
+  .arrow {
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: transform var(--duration-base) var(--ease-spring);
+  }
+
+  /* Open state: set by the script, with :hover/:focus-visible as a no-JavaScript fallback. */
+  .folder[data-open] .sheet,
+  .folder:hover .sheet,
+  .folder:focus-visible .sheet {
+    transform: translateY(-8%) rotate(-3deg);
+  }
+  .folder[data-open] .front,
+  .folder:hover .front,
+  .folder:focus-visible .front {
+    transform: rotateX(-64deg);
+  }
+  .folder[data-open] .arrow,
+  .folder:hover .arrow {
+    transform: translate(3px, -3px);
+  }
+  .folder:focus-visible {
+    outline-offset: 8px;
+    border-radius: var(--radius-card);
+  }
+</style>
+
+<script>
+  /*
+   * Opens folders on hover and keyboard focus. On touch screens (no hover) a folder opens
+   * while it sits in the middle of the viewport, so the preview is still discovered.
+   */
+  const canHover = window.matchMedia('(hover: hover)').matches;
+  const folders = document.querySelectorAll<HTMLElement>('[data-folder]');
+
+  folders.forEach((folder) => {
+    const open = (value: boolean) => folder.toggleAttribute('data-open', value);
+    folder.addEventListener('focus', () => open(true));
+    folder.addEventListener('blur', () => open(false));
+    if (canHover) {
+      folder.addEventListener('pointerenter', () => open(true));
+      folder.addEventListener('pointerleave', () => open(document.activeElement === folder));
+    }
+  });
+
+  if (!canHover) {
+    const observer = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) =>
+          (entry.target as HTMLElement).toggleAttribute('data-open', entry.isIntersecting),
+        ),
+      { rootMargin: '-35% 0px -35% 0px' },
+    );
+    folders.forEach((folder) => observer.observe(folder));
+  }
+</script>

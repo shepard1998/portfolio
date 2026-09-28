@@ -1,0 +1,236 @@
+---
+import { Image } from 'astro:assets';
+
+import type { Project } from '../data/projects';
+import { getLocaleFromPath, useTranslations } from '../i18n/utils';
+import { previewTransitionName } from '../lib/projects';
+
+interface Props {
+  project: Project;
+  /** Position in the list; varies the placeholder colors. */
+  index: number;
+  /**
+   * `folder`: plays only while its folder is open.
+   * `hero`: plays whenever it is visible (detail page).
+   */
+  mode: 'folder' | 'hero';
+  class?: string;
+}
+
+const { project, index, mode, class: className } = Astro.props;
+const t = useTranslations(getLocaleFromPath(Astro.url.pathname));
+const video = project.data.video;
+const hues = ['0deg', '40deg', '-40deg'];
+---
+
+<!--
+  16:10 preview. With a video: muted loop that only loads near the viewport and plays when
+  allowed (see the script). Without one: an animated placeholder in the site palette.
+  Both share a view-transition name so the folder preview morphs into the detail page one.
+-->
+<div
+  class:list={['preview', className]}
+  data-preview={mode}
+  style={`view-transition-name: ${previewTransitionName(project.slug)}; --hue: ${hues[index % hues.length]}`}
+>
+  {video ? (
+    <>
+      {video.poster && (
+        <Image
+          src={video.poster}
+          alt=""
+          class="poster"
+          widths={[640, 1280]}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+        />
+      )}
+      <video muted loop playsinline preload="none" aria-hidden="true" data-preview-video>
+        {video.webm && <source data-src={video.webm} type="video/webm" />}
+        <source data-src={video.mp4} type="video/mp4" />
+      </video>
+    </>
+  ) : (
+    <div class="placeholder" aria-hidden="true">
+      <span class="wash" />
+      <span class="orb orb-a" />
+      <span class="orb orb-b" />
+      <span class="grid-lines" />
+      <span class="caption">{t('projects.previewSoon')}</span>
+      <span class="file">{project.slug}.mp4 · loop</span>
+      <span class="progress" />
+    </div>
+  )}
+</div>
+
+<style>
+  .preview {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: #0f1122;
+    isolation: isolate;
+  }
+  .poster,
+  video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .placeholder {
+    position: absolute;
+    inset: 0;
+    filter: hue-rotate(var(--hue));
+  }
+  .wash {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, #2f4bff 0%, #0f1122 38%, #5b78ff 64%, #07080f 100%);
+    background-size: 300% 100%;
+    animation: pan 6s linear infinite;
+  }
+  .orb {
+    position: absolute;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 2px solid rgb(238 240 255 / 0.7);
+  }
+  .orb-a {
+    width: 34%;
+    left: 10%;
+    top: 16%;
+    animation: orbit 4.2s var(--ease-out-expo) infinite alternate;
+  }
+  .orb-b {
+    width: 14%;
+    right: 14%;
+    bottom: 22%;
+    background: rgb(238 240 255 / 0.85);
+    border: 0;
+    animation: orbit-b 3.4s var(--ease-spring) infinite alternate;
+  }
+  .grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgb(238 240 255 / 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(238 240 255 / 0.08) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .caption,
+  .file {
+    position: absolute;
+    left: 5%;
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #eef0ff;
+  }
+  .caption {
+    bottom: 12%;
+    font-size: clamp(0.7rem, 1.6vw, 0.95rem);
+    font-weight: 600;
+  }
+  .file {
+    top: 7%;
+    font-size: 0.65rem;
+    opacity: 0.75;
+  }
+  .progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: #eef0ff;
+    transform-origin: left;
+    animation: progress 5s linear infinite;
+  }
+
+  /* In folders the placeholder only moves while the folder is open. */
+  :global(.folder:not([data-open])) [data-preview='folder'] .placeholder * {
+    animation-play-state: paused;
+  }
+
+  @keyframes pan {
+    to {
+      background-position: 300% 0;
+    }
+  }
+  @keyframes orbit {
+    to {
+      transform: translate(120%, 30%) scale(0.7);
+    }
+  }
+  @keyframes orbit-b {
+    to {
+      transform: translate(-160%, -60%) scale(1.4);
+    }
+  }
+  @keyframes progress {
+    from {
+      transform: scaleX(0);
+    }
+  }
+</style>
+
+<script>
+  /*
+   * Video previews: sources load only when the preview gets close to the viewport. Hero
+   * previews play while visible; folder previews play while their folder is open.
+   */
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function load(video: HTMLVideoElement) {
+    if (video.dataset.loaded) return;
+    video.querySelectorAll<HTMLSourceElement>('source[data-src]').forEach((source) => {
+      source.src = source.dataset.src ?? '';
+    });
+    video.load();
+    video.dataset.loaded = '';
+  }
+
+  function setPlaying(video: HTMLVideoElement, playing: boolean) {
+    if (reduceMotion) return;
+    if (playing) {
+      load(video);
+      video.play().catch(() => {
+        // Autoplay can be refused (e.g. power saving); the poster stays visible.
+      });
+    } else {
+      video.pause();
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-preview]').forEach((preview) => {
+    const video = preview.querySelector<HTMLVideoElement>('[data-preview-video]');
+    if (!video) return;
+    let visible = false;
+
+    new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) load(video);
+      },
+      { rootMargin: '300px' },
+    ).observe(preview);
+
+    if (preview.dataset.preview === 'hero') {
+      new IntersectionObserver(([entry]) =>
+        setPlaying(video, entry?.isIntersecting ?? false),
+      ).observe(preview);
+      return;
+    }
+
+    const folder = preview.closest<HTMLElement>('.folder');
+    if (!folder) return;
+    new IntersectionObserver(([entry]) => {
+      visible = entry?.isIntersecting ?? false;
+      if (!visible) setPlaying(video, false);
+    }).observe(preview);
+    new MutationObserver(() =>
+      setPlaying(video, visible && folder.hasAttribute('data-open')),
+    ).observe(folder, { attributes: true, attributeFilter: ['data-open'] });
+  });
+</script>

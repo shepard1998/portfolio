@@ -17,6 +17,7 @@ function variantOf(element: Element): RevealVariant {
 /**
  * Animates `[data-reveal]` elements the first time they enter the viewport.
  * Children of `[data-reveal-stagger]` are revealed one after another.
+ * `[data-split-view]` texts (SplitText with `onView`) start their CSS animation on entering.
  * With reduced motion everything is shown immediately.
  */
 export function initReveal(root: ParentNode = document): void {
@@ -44,6 +45,23 @@ export function initReveal(root: ParentNode = document): void {
       { margin: '0px 0px -10% 0px' },
     );
   });
+
+  // Split texts that wait for the viewport: CSS starts their animation once marked.
+  root
+    .querySelectorAll<HTMLElement>('[data-split-view]:not([data-revealed])')
+    .forEach((element) => {
+      if (reduceMotion) {
+        element.dataset.revealed = '';
+        return;
+      }
+      inView(
+        element,
+        () => {
+          element.dataset.revealed = '';
+        },
+        { margin: '0px 0px -10% 0px' },
+      );
+    });
 
   document.documentElement.dataset.revealReady = '';
 }
