@@ -2,7 +2,7 @@
 
 Personal portfolio of **Kevin De Jesús Fernández**, software engineer. It showcases projects, professional experience and skills, in **English** and **Spanish**.
 
-> **Status:** in development. The design system, the hero with the flippable contact card and the projects section (with sample content) are ready; the experience and skills sections are next. See the [roadmap](#roadmap).
+> **Status:** in development. The design system, the hero with the flippable contact card and the projects section (with sample content) and the experience timeline are ready; the skills section is next. See the [roadmap](#roadmap).
 
 ---
 
@@ -67,11 +67,11 @@ src/
 ├── assets/         # Images processed by Astro (project screenshots)
 ├── components/     # Astro components: hero, contact card, project folders, header, footer…
 ├── content/        # Project case studies in Markdown, one file per language (+ tests)
-├── data/           # Profile data and project loaders shared by every page (+ tests)
+├── data/           # Profile, experience and project data shared by every page (+ tests)
 ├── dev/styleguide/ # Development-only styleguide page and the integration that serves it
 ├── i18n/           # Locale config, UI dictionaries and helpers (+ tests)
 ├── layouts/        # Base HTML layout (fonts, theme script, header, footer)
-├── lib/            # Framework-free logic: theme, contrast, motion helpers (+ tests)
+├── lib/            # Framework-free logic: theme, dates, contrast, motion helpers (+ tests)
 ├── pages/          # Routes: `/`, `/projects/<slug>` and their `/es/` versions
 └── styles/         # Global CSS with design tokens, and the palette used by tests
 public/             # Static assets served as-is
@@ -127,6 +127,12 @@ The Markdown body is the case study shown on the project page. A unit test check
 
 **Folders** open on hover or keyboard focus (on touch screens, when scrolled to the middle of the screen): the glass flap tilts forward and the preview sheet rises. Where the browser supports cross-document View Transitions, the preview morphs from the folder into the project page.
 
+### Experience
+
+The NTSprint timeline lives in `src/data/experience.ts`: one entry per project with its name and participation text in both languages, start and end months (`YYYY-MM`) and stack. Entries are shown most recent first; dates and durations are formatted per language with `Intl`. These are confidential client projects, so the section states that only the participation is described.
+
+Each node is a native `<details>` element: it works without JavaScript and is accessible by default. Browsers that support `::details-content` animate its height. The timeline line draws itself while scrolling where CSS scroll-driven animations are supported.
+
 ### Header
 
 The header stays fixed at the top while scrolling; a bottom border appears once the page scrolls.
@@ -161,7 +167,7 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org) (`fea
 - [x] Visual direction and design system (light/dark themes, typography, motion)
 - [x] Hero and flippable contact card
 - [x] Projects shown as open folders with looping video previews and project pages
-- [ ] Professional experience timeline with expandable nodes
+- [x] Professional experience timeline with expandable nodes
 - [ ] Skills and education
 - [ ] SEO, accessibility and performance
 - [ ] Deployment to Vercel
