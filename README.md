@@ -2,7 +2,7 @@
 
 Personal portfolio of **Kevin De Jesús Fernández**, software engineer. It showcases projects, professional experience and skills, in **English** and **Spanish**.
 
-> **Status:** in development. The foundation and the design system are ready (light/dark themes, typography, motion primitives); the content sections are next. See the [roadmap](#roadmap).
+> **Status:** in development. The design system, the hero and the flippable contact card are ready; the projects, experience and skills sections are next. See the [roadmap](#roadmap).
 
 ---
 
@@ -64,7 +64,8 @@ The **styleguide** with every design token and animation is available at <http:/
 
 ```text
 src/
-├── components/     # Astro components: header, footer, theme toggle, SplitText…
+├── components/     # Astro components: hero, contact card, header, footer, theme toggle…
+├── data/           # Profile data shared by every language (name, email, links) (+ tests)
 ├── dev/styleguide/ # Development-only styleguide page and the integration that serves it
 ├── i18n/           # Locale config, UI dictionaries and helpers (+ tests)
 ├── layouts/        # Base HTML layout (fonts, theme script, header, footer)
@@ -80,6 +81,17 @@ public/             # Static assets served as-is
 - UI strings live in `src/i18n/ui.ts`. Every locale must define every key of the English dictionary (enforced by TypeScript and by a unit test).
 - Components read text with `useTranslations(locale)`; no UI text is hard-coded in components.
 - Each page exists once per locale (`src/pages/index.astro`, `src/pages/es/index.astro`) and renders a shared component.
+
+### Content
+
+- Values that are the same in every language (name, email, LinkedIn and GitHub URLs) live in `src/data/profile.ts`.
+- Translatable copy (role, location, tagline, "About me") lives in the i18n dictionaries.
+
+### Contact card
+
+- It flips in 3D when the card is clicked or with the corner button. Links and the **Copy** button keep their own behavior.
+- The hidden face is `inert`, so keyboard and screen-reader users only reach the visible one.
+- On desktop it tilts slightly toward the mouse and a soft glare follows the cursor.
 
 ### Design system
 
@@ -108,7 +120,7 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org) (`fea
 
 - [x] Project setup: Astro, Tailwind CSS, i18n, quality tooling
 - [x] Visual direction and design system (light/dark themes, typography, motion)
-- [ ] Hero and flippable contact card
+- [x] Hero and flippable contact card
 - [ ] Projects shown as open folders with looping video previews
 - [ ] Professional experience timeline with expandable nodes
 - [ ] Skills and education
