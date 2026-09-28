@@ -1,0 +1,92 @@
+---
+import { getLocaleFromPath, useTranslations } from '../i18n/utils';
+
+const t = useTranslations(getLocaleFromPath(Astro.url.pathname));
+---
+
+<button
+  type="button"
+  class="theme-toggle group relative grid size-10 place-items-center rounded-full border border-line text-fg transition-colors duration-(--duration-fast) hover:border-accent-text hover:text-accent-text"
+  aria-label={t('theme.toggle')}
+  aria-pressed="false"
+  data-theme-toggle
+>
+  <svg
+    class="sun col-start-1 row-start-1 size-5 transition-[transform,opacity] duration-(--duration-base) ease-spring"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+  </svg>
+  <svg
+    class="moon col-start-1 row-start-1 size-5 transition-[transform,opacity] duration-(--duration-base) ease-spring"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path>
+  </svg>
+</button>
+
+<style>
+  /* Light theme shows the sun; dark theme rotates it away and brings in the moon. */
+  .moon {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.4);
+  }
+  :global([data-theme='dark']) .sun {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.4);
+  }
+  :global([data-theme='dark']) .moon {
+    opacity: 1;
+    transform: none;
+  }
+</style>
+
+<script>
+  import { readStoredTheme, resolveTheme, storeTheme, toggleTheme, type Theme } from '../lib/theme';
+  import { circularReveal, elementCenter } from '../lib/view-transition';
+
+  const root = document.documentElement;
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function currentTheme(): Theme {
+    return root.dataset.theme === 'dark' ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme: Theme): void {
+    root.dataset.theme = theme;
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(theme === 'dark'));
+    });
+  }
+
+  applyTheme(currentTheme());
+
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      const next = toggleTheme(currentTheme());
+      const origin =
+        event.detail > 0 ? { x: event.clientX, y: event.clientY } : elementCenter(button);
+      circularReveal(origin, () => applyTheme(next));
+      storeTheme(window.localStorage, next);
+    });
+  });
+
+  // Follow system changes until the visitor picks a theme explicitly.
+  systemDark.addEventListener('change', (event) => {
+    if (readStoredTheme(window.localStorage) === null) {
+      applyTheme(resolveTheme(null, event.matches));
+    }
+  });
+</script>

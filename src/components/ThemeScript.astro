@@ -1,0 +1,30 @@
+---
+/*
+ * Runs before first paint to apply the theme and avoid a flash of the wrong one.
+ * It must stay inline and dependency-free, so it mirrors `resolveTheme` in src/lib/theme.ts.
+ */
+---
+
+<script is:inline>
+  (() => {
+    const root = document.documentElement;
+    let stored = null;
+    try {
+      stored = localStorage.getItem('theme');
+    } catch {
+      // Storage unavailable: follow the system preference.
+    }
+    const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme =
+      stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
+
+    // Hide scroll-reveal elements only when motion will animate them in.
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.classList.add('motion-ok');
+      // Safety net: never leave content hidden if the reveal script fails to load.
+      setTimeout(() => {
+        if (!('revealReady' in root.dataset)) root.classList.remove('motion-ok');
+      }, 2500);
+    }
+  })();
+</script>
