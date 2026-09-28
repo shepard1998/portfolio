@@ -1,0 +1,31 @@
+---
+import { localeNames, locales } from '../i18n/config';
+import { getLocaleFromPath, localizePath, useTranslations } from '../i18n/utils';
+
+const currentLocale = getLocaleFromPath(Astro.url.pathname);
+const t = useTranslations(currentLocale);
+---
+
+<nav aria-label={t('nav.language')}>
+  <ul class="flex gap-4 text-sm">
+    {locales.map((locale) => (
+      <li>
+        {locale === currentLocale ? (
+          <span aria-current="true" class="font-semibold">
+            {locale.toUpperCase()}
+          </span>
+        ) : (
+          <a
+            href={localizePath(Astro.url.pathname, locale)}
+            hreflang={locale}
+            lang={locale}
+            aria-label={t('nav.switchTo', { language: localeNames[locale] })}
+            class="text-neutral-400 transition-colors hover:text-neutral-50"
+          >
+            {locale.toUpperCase()}
+          </a>
+        )}
+      </li>
+    ))}
+  </ul>
+</nav>

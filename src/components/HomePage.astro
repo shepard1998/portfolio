@@ -1,0 +1,18 @@
+---
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getLocaleFromPath, useTranslations } from '../i18n/utils';
+
+const t = useTranslations(getLocaleFromPath(Astro.url.pathname));
+---
+
+<BaseLayout>
+  <header class="flex justify-end p-6">
+    <LanguageSwitcher />
+  </header>
+  <main class="grid min-h-[80dvh] place-content-center px-4 text-center">
+    <p class="text-sm tracking-widest text-neutral-400 uppercase">{t('home.eyebrow')}</p>
+    <h1 class="mt-4 text-5xl font-bold tracking-tight sm:text-7xl">{t('home.title')}</h1>
+    <p class="mt-4 text-xl text-neutral-300">{t('home.subtitle')}</p>
+  </main>
+</BaseLayout>
