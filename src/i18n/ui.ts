@@ -18,7 +18,6 @@ const en = {
   'hero.tagline':
     'I build web and desktop software, from .NET and Angular platforms to Rust desktop apps.',
   'hero.ctaProjects': 'View projects',
-  'hero.ctaContact': 'Get in touch',
   'hero.scroll': 'Scroll',
   'card.label': 'Contact card',
   'card.role': 'Software Engineer',
@@ -65,7 +64,6 @@ export const ui: Record<Locale, Record<UiKey, string>> = {
     'hero.tagline':
       'Construyo software web y de escritorio, desde plataformas .NET y Angular hasta apps de escritorio en Rust.',
     'hero.ctaProjects': 'Ver proyectos',
-    'hero.ctaContact': 'Contactar',
     'hero.scroll': 'Desliza',
     'card.label': 'Tarjeta de contacto',
     'card.role': 'Ingeniero de Software',

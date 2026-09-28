@@ -1,0 +1,119 @@
+---
+interface Props {
+  text: string;
+  /** Delay in ms before the first character is typed. */
+  startDelay?: number;
+}
+
+const { text, startDelay = 0 } = Astro.props;
+---
+
+<!--
+  Types the text, holds it, deletes it and starts again, with a blinking cursor.
+  A hidden copy of the full text (plus cursor) shares the grid cell with the animated one, so
+  the paragraph keeps its final size and nothing around it moves while typing.
+  Without JavaScript or with reduced motion the full text is shown as is.
+-->
+<span class="typewriter" data-typewriter data-text={text} data-start-delay={startDelay}>
+  <span class="sr-only">{text}</span>
+  <span class="stack" aria-hidden="true">
+    <!-- prettier-ignore -->
+    <span class="ghost">{text}<span class="cursor"></span></span>
+    <!-- prettier-ignore -->
+    <span class="live"><span data-typewriter-output>{text}</span><span class="cursor"></span></span>
+  </span>
+</span>
+
+<style>
+  .stack {
+    display: grid;
+  }
+  .ghost,
+  .live {
+    grid-area: 1 / 1;
+  }
+  .ghost {
+    visibility: hidden;
+  }
+  /* Hide the server-rendered text until the script takes over, to avoid a flash. */
+  :global(.motion-ok) .typewriter:not([data-typewriter-ready]) .live {
+    visibility: hidden;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 0.12em;
+    height: 1.05em;
+    margin-inline-start: 0.08em;
+    vertical-align: -0.15em;
+    background: var(--accent-text);
+    border-radius: 1px;
+  }
+  .typewriter:not([data-typewriter-ready]) .live .cursor {
+    opacity: 0;
+  }
+  /* Solid while typing or deleting, blinking while idle. */
+  .typewriter[data-phase='holding'] .live .cursor,
+  .typewriter[data-phase='waiting'] .live .cursor {
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  import { nextTypewriterStep, visibleText, type TypewriterState } from '../lib/typewriter';
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLElement>('[data-typewriter]').forEach((root) => {
+    const output = root.querySelector<HTMLElement>('[data-typewriter-output]');
+    const text = root.dataset.text ?? '';
+    if (!output || !text || reduceMotion) return;
+
+    let state: TypewriterState = { phase: 'waiting', length: 0 };
+    let timer: number | undefined;
+    let onScreen = true;
+
+    const render = () => {
+      output.textContent = visibleText(text, state.length);
+      root.dataset.phase = state.phase;
+    };
+
+    const tick = () => {
+      // Pause while the text is off screen or the tab is hidden; resume where it left off.
+      if (!onScreen || document.hidden) {
+        timer = undefined;
+        return;
+      }
+      const next = nextTypewriterStep(state, text);
+      state = next.state;
+      render();
+      timer = window.setTimeout(tick, next.delay);
+    };
+
+    const resume = () => {
+      if (timer === undefined && onScreen && !document.hidden) tick();
+    };
+
+    render();
+    root.toggleAttribute('data-typewriter-ready', true);
+
+    new IntersectionObserver(([entry]) => {
+      onScreen = entry?.isIntersecting ?? true;
+      resume();
+    }).observe(root);
+    document.addEventListener('visibilitychange', resume);
+
+    timer = window.setTimeout(
+      () => {
+        timer = undefined;
+        resume();
+      },
+      Number(root.dataset.startDelay) || 0,
+    );
+  });
+</script>

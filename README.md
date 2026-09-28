@@ -93,6 +93,10 @@ public/             # Static assets served as-is
 - The hidden face is `inert`, so keyboard and screen-reader users only reach the visible one.
 - On desktop it tilts slightly toward the mouse and a soft glare follows the cursor.
 
+### Header
+
+The header stays fixed at the top while scrolling; a bottom border appears once the page scrolls.
+
 ### Design system
 
 - **Direction "Electric":** Unbounded for display text, JetBrains Mono for body and labels, a blue-black / lavender-white palette with an electric blue accent.
@@ -102,6 +106,7 @@ public/             # Static assets served as-is
   - `<SplitText>` makes characters rise on load (CSS only).
   - `data-reveal="up | fade | scale"` reveals an element when it scrolls into view.
   - `data-reveal-stagger` reveals its children one after another.
+  - `<Typewriter>` types a text, holds it, deletes it and starts again, with a blinking cursor. It reserves the space of the full text so nothing moves, and pauses while off screen or in a hidden tab.
   - Everything is disabled when the visitor prefers reduced motion.
 
 ---

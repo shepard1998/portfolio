@@ -1,6 +1,7 @@
 ---
 import ContactCard from './ContactCard.astro';
 import SplitText from './SplitText.astro';
+import Typewriter from './Typewriter.astro';
 import { profile } from '../data/profile';
 import { getLocaleFromPath, useTranslations } from '../i18n/utils';
 
@@ -10,8 +11,8 @@ const t = useTranslations(getLocaleFromPath(Astro.url.pathname));
 <!--
   Two columns on large screens (name and copy on the left, contact card on the right) sized to
   fit the first screen without scrolling; stacked on smaller screens.
-  Entrance sequence (CSS only): the name rises letter by letter, then the tagline, the buttons
-  and the contact card follow with staggered delays.
+  Entrance sequence: the name rises letter by letter, the tagline starts typing in a loop, and
+  the buttons and the contact card follow with staggered delays.
 -->
 <section
   id="about"
@@ -30,8 +31,8 @@ const t = useTranslations(getLocaleFromPath(Astro.url.pathname));
       <SplitText text={profile.heroName} />
     </h1>
 
-    <p class="max-w-[38ch] animate-enter text-lg text-balance [animation-delay:450ms] sm:text-xl">
-      {t('hero.tagline')}
+    <p class="max-w-[38ch] text-lg sm:text-xl">
+      <Typewriter text={t('hero.tagline')} startDelay={450} />
     </p>
 
     <div class="flex animate-enter flex-wrap gap-3 [animation-delay:560ms]">
@@ -46,12 +47,6 @@ const t = useTranslations(getLocaleFromPath(Astro.url.pathname));
         >
           ↓
         </span>
-      </a>
-      <a
-        href="#contact"
-        class="inline-flex items-center rounded-full border border-line px-6 py-3 text-sm transition-colors duration-(--duration-fast) hover:border-accent-text hover:text-accent-text"
-      >
-        {t('hero.ctaContact')}
       </a>
     </div>
 
