@@ -12,7 +12,9 @@ export const profile = {
     linkedin: 'https://www.linkedin.com/in/kevin-fernandez-90805624b/',
     github: 'https://github.com/shepard1998',
   },
-} as const;
+  /** EF SET English certificate. The link is hidden until the URL is set. */
+  efSet: null as null | { url: string; result: string },
+};
 
 /** Shows a URL without protocol, `www.` or trailing slash: `github.com/shepard1998`. */
 export function displayUrl(url: string): string {

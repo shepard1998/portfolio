@@ -1,0 +1,160 @@
+---
+import SkillMarquee from './SkillMarquee.astro';
+import SplitText from './SplitText.astro';
+import { profile } from '../data/profile';
+import { skillGroups } from '../data/skills';
+import { getLocaleFromPath, useTranslations } from '../i18n/utils';
+
+const locale = getLocaleFromPath(Astro.url.pathname);
+const t = useTranslations(locale);
+
+// Bento layout on large screens: column and row spans per group.
+const spans: Record<string, string> = {
+  frontend: 'lg:col-span-4',
+  backend: 'lg:col-span-2 lg:row-span-2',
+  desktop: 'lg:col-span-2',
+  databases: 'lg:col-span-2',
+  cloud: 'lg:col-span-2',
+  security: 'lg:col-span-2',
+  quality: 'lg:col-span-2',
+};
+
+const languages = [
+  { name: t('languages.spanish'), level: t('languages.native') },
+  { name: t('languages.english'), level: t('languages.fluent') },
+];
+---
+
+<section id="skills" class="scroll-mt-16 border-t border-line">
+  <div class="mx-auto grid max-w-6xl gap-12 px-4 pt-20 sm:px-6 lg:pt-28">
+    <header class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-end">
+      <div class="grid gap-4">
+        <p class="label" data-reveal="fade">
+          {t('skills.eyebrow')}
+        </p>
+        <h2 class="font-display text-headline font-extrabold">
+          <SplitText text={t('skills.title')} onView />
+        </h2>
+      </div>
+      <p class="text-muted" data-reveal>
+        {t('skills.intro')}
+      </p>
+    </header>
+  </div>
+
+  <div class="py-12" data-reveal="fade">
+    <SkillMarquee />
+  </div>
+
+  <div class="mx-auto grid max-w-6xl gap-16 px-4 pb-20 sm:px-6 lg:pb-28">
+    <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-6" data-reveal data-reveal-stagger>
+      {skillGroups.map((group) => (
+        <li class:list={['group-card', spans[group.id]]}>
+          <div class="flex items-center gap-3">
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d={group.icon} />
+              </svg>
+            </span>
+            <h3 class="font-display text-lg font-bold">{group.title[locale]}</h3>
+          </div>
+          <p class="text-sm text-muted">{group.description[locale]}</p>
+          <ul class="mt-auto flex flex-wrap gap-1.5 pt-2">
+            {group.skills.map((skill) => (
+              <li class="rounded-full border border-line px-2.5 py-1 font-mono text-xs">{skill}</li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
+
+    <div class="grid gap-4 md:grid-cols-2" data-reveal data-reveal-stagger>
+      <article class="group-card">
+        <p class="label">{t('education.title')}</p>
+        <h3 class="font-display text-title font-bold">{t('education.degree')}</h3>
+        <p class="text-sm">{t('education.school')}</p>
+        <p class="mt-auto font-mono text-sm text-muted">{t('education.period')}</p>
+      </article>
+
+      <article class="group-card">
+        <p class="label">{t('languages.title')}</p>
+        <dl class="grid gap-3">
+          {languages.map(({ name, level }) => (
+            <div class="flex items-baseline justify-between gap-4 border-b border-line pb-3">
+              <dt class="font-display text-title font-bold">{name}</dt>
+              <dd class="label">{level}</dd>
+            </div>
+          ))}
+        </dl>
+        {profile.efSet && (
+          <a
+            href={profile.efSet.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-auto w-fit text-sm text-accent-text underline underline-offset-4"
+          >
+            {t('languages.certificate')} · {profile.efSet.result} ↗
+          </a>
+        )}
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .group-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    overflow: hidden;
+    transition:
+      border-color var(--duration-base),
+      transform var(--duration-base) var(--ease-spring);
+  }
+  /* Accent glow that rises from the bottom edge on hover. */
+  .group-card::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 60%;
+    background: radial-gradient(
+      ellipse at 50% 120%,
+      color-mix(in srgb, var(--accent) 22%, transparent),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity var(--duration-base);
+    pointer-events: none;
+  }
+  .group-card:hover {
+    border-color: color-mix(in srgb, var(--accent-text) 50%, var(--line));
+    transform: translateY(-3px);
+  }
+  .group-card:hover::after {
+    opacity: 1;
+  }
+
+  .icon {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.75rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .icon svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>

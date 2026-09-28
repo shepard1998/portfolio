@@ -1,0 +1,46 @@
+---
+import { skillIcons, skillInitials } from '../data/skills';
+import { contrastRatio } from '../lib/contrast';
+import { palette } from '../styles/palette';
+
+interface Props {
+  name: string;
+  class?: string;
+}
+
+const { name, class: className } = Astro.props;
+const icon = skillIcons[name];
+
+// Brand color used on hover, per theme; falls back to the text color when it would be
+// too faint on that theme's surface (e.g. black logos on the dark theme).
+const MIN_CONTRAST = 2.2;
+const brand = icon ? `#${icon.hex}` : '';
+const brandFor = (surface: string) =>
+  brand && contrastRatio(brand, surface) >= MIN_CONTRAST ? brand : 'var(--fg)';
+const brandStyle = icon
+  ? `--brand-light: ${brandFor(palette.light.surface)}; --brand-dark: ${brandFor(palette.dark.surface)}`
+  : undefined;
+---
+
+<!-- Brand logo from Simple Icons in the current text color, or an initials badge without one. -->
+{icon ? (
+  <svg
+    class:list={['size-5 flex-none', className]}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+    style={brandStyle}
+  >
+    <path d={icon.path} />
+  </svg>
+) : (
+  <span
+    class:list={[
+      'grid size-5 flex-none place-items-center rounded-md border border-current font-mono text-[0.55rem] leading-none font-bold',
+      className,
+    ]}
+    aria-hidden="true"
+  >
+    {skillInitials(name)}
+  </span>
+)}
