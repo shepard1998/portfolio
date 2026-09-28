@@ -2,7 +2,7 @@
 
 Personal portfolio of **Kevin De Jesús Fernández**, software engineer. It showcases projects, professional experience and skills, in **English** and **Spanish**.
 
-> **Status:** in development. The design system, the hero and the flippable contact card are ready; the projects, experience and skills sections are next. See the [roadmap](#roadmap).
+> **Status:** in development. The design system, the hero with the flippable contact card and the projects section (with sample content) are ready; the experience and skills sections are next. See the [roadmap](#roadmap).
 
 ---
 
@@ -64,13 +64,15 @@ The **styleguide** with every design token and animation is available at <http:/
 
 ```text
 src/
-├── components/     # Astro components: hero, contact card, header, footer, theme toggle…
-├── data/           # Profile data shared by every language (name, email, links) (+ tests)
+├── assets/         # Images processed by Astro (project screenshots)
+├── components/     # Astro components: hero, contact card, project folders, header, footer…
+├── content/        # Project case studies in Markdown, one file per language (+ tests)
+├── data/           # Profile data and project loaders shared by every page (+ tests)
 ├── dev/styleguide/ # Development-only styleguide page and the integration that serves it
 ├── i18n/           # Locale config, UI dictionaries and helpers (+ tests)
 ├── layouts/        # Base HTML layout (fonts, theme script, header, footer)
 ├── lib/            # Framework-free logic: theme, contrast, motion helpers (+ tests)
-├── pages/          # Routes: `/` (English) and `/es/` (Spanish)
+├── pages/          # Routes: `/`, `/projects/<slug>` and their `/es/` versions
 └── styles/         # Global CSS with design tokens, and the palette used by tests
 public/             # Static assets served as-is
 ```
@@ -92,6 +94,38 @@ public/             # Static assets served as-is
 - It flips in 3D when the card is clicked or with the corner button. Links and the **Copy** button keep their own behavior.
 - The hidden face is `inert`, so keyboard and screen-reader users only reach the visible one.
 - On desktop it tilts slightly toward the mouse and a soft glare follows the cursor.
+
+### Projects
+
+Each project is a Markdown file per language with the same slug in both:
+
+```text
+src/content/projects/en/<slug>.md
+src/content/projects/es/<slug>.md
+src/assets/projects/<slug>/   # screenshots for the gallery
+public/videos/<slug>.mp4      # looping preview (optional)
+```
+
+The frontmatter is validated at build time (`src/content.config.ts`):
+
+| Field     | Required | Notes                                                                        |
+| --------- | -------- | ---------------------------------------------------------------------------- |
+| `title`   | yes      |                                                                              |
+| `summary` | yes      | One or two sentences, shown on the folder                                    |
+| `year`    | yes      |                                                                              |
+| `role`    | yes      |                                                                              |
+| `stack`   | yes      | List of technologies; the folder shows the first four                        |
+| `order`   | yes      | Position in the list, lowest first; unique                                   |
+| `sample`  | no       | `true` marks placeholder content with a "Sample" badge                       |
+| `links`   | no       | `live` and `repo` URLs                                                       |
+| `video`   | no       | `mp4`, optional `webm` and `poster` image; a placeholder is shown without it |
+| `gallery` | no       | Images with `src`, `alt` and optional `caption`                              |
+
+The Markdown body is the case study shown on the project page. A unit test checks that every project exists in both languages with the same `order`, `year`, `sample` and `stack`.
+
+**Preview videos:** MP4 (H.264), optionally also WebM, no audio, 16:10 at 1280×800, 6–10 seconds with a seamless loop, at most 2 MB. Videos only download when the preview gets close to the viewport; on the home page they play while a folder is open, on the project page while visible.
+
+**Folders** open on hover or keyboard focus (on touch screens, when scrolled to the middle of the screen): the glass flap tilts forward and the preview sheet rises. Where the browser supports cross-document View Transitions, the preview morphs from the folder into the project page.
 
 ### Header
 
@@ -126,7 +160,7 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org) (`fea
 - [x] Project setup: Astro, Tailwind CSS, i18n, quality tooling
 - [x] Visual direction and design system (light/dark themes, typography, motion)
 - [x] Hero and flippable contact card
-- [ ] Projects shown as open folders with looping video previews
+- [x] Projects shown as open folders with looping video previews and project pages
 - [ ] Professional experience timeline with expandable nodes
 - [ ] Skills and education
 - [ ] SEO, accessibility and performance
