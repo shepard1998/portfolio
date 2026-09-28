@@ -30,3 +30,7 @@ Thumbs.db
 # Private source documents (not published)
 *.docx
 ~$*
+
+# Local-only agent docs (never published)
+CLAUDE.md
+MEMORY.md
