@@ -2,7 +2,7 @@
 
 Personal portfolio of **Kevin De Jesús Fernández**, software engineer. It showcases projects, professional experience and skills, in **English** and **Spanish**.
 
-> **Status:** in development. The design system, the hero with the flippable contact card and the projects section (with sample content) and the experience timeline are ready; the skills section is next. See the [roadmap](#roadmap).
+> **Status:** in development. The design system, the hero with the flippable contact card and the projects section (with sample content), the experience timeline and the skills section are ready; SEO, accessibility and performance polish is next. See the [roadmap](#roadmap).
 
 ---
 
@@ -67,7 +67,7 @@ src/
 ├── assets/         # Images processed by Astro (project screenshots)
 ├── components/     # Astro components: hero, contact card, project folders, header, footer…
 ├── content/        # Project case studies in Markdown, one file per language (+ tests)
-├── data/           # Profile, experience and project data shared by every page (+ tests)
+├── data/           # Profile, experience, skills and project data shared by every page (+ tests)
 ├── dev/styleguide/ # Development-only styleguide page and the integration that serves it
 ├── i18n/           # Locale config, UI dictionaries and helpers (+ tests)
 ├── layouts/        # Base HTML layout (fonts, theme script, header, footer)
@@ -133,6 +133,12 @@ The NTSprint timeline lives in `src/data/experience.ts`: one entry per project w
 
 Each node is a native `<details>` element: it works without JavaScript and is accessible by default. Browsers that support `::details-content` animate its height. The timeline line draws itself while scrolling where CSS scroll-driven animations are supported.
 
+### Skills
+
+Skill groups live in `src/data/skills.ts` (title and description in both languages, a line icon and the list of technologies). Logos come from [Simple Icons](https://simpleicons.org); technologies without a logo there (mostly Microsoft products) get an initials badge. On hover, logos in the ribbon take their brand color, falling back to the text color when it would be too faint on the current theme.
+
+The EF SET certificate link in the languages card appears once `profile.efSet` is set in `src/data/profile.ts`.
+
 ### Header
 
 The header stays fixed at the top while scrolling; a bottom border appears once the page scrolls.
@@ -168,6 +174,6 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org) (`fea
 - [x] Hero and flippable contact card
 - [x] Projects shown as open folders with looping video previews and project pages
 - [x] Professional experience timeline with expandable nodes
-- [ ] Skills and education
+- [x] Skills and education
 - [ ] SEO, accessibility and performance
 - [ ] Deployment to Vercel
