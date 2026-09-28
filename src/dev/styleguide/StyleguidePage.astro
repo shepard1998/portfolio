@@ -1,0 +1,253 @@
+---
+/*
+ * Design-system styleguide. Development only: injected by ./integration.ts when running
+ * `astro dev`, so it never reaches the production build. Copy lives here, not in the UI
+ * dictionaries, because visitors never see it.
+ */
+import SplitText from '../../components/SplitText.astro';
+import { getLocaleFromPath } from '../../i18n/utils';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { contrastRatio, wcagGrade } from '../../lib/contrast';
+import { contrastPairs, palette, type ColorToken } from '../../styles/palette';
+
+const locale = getLocaleFromPath(Astro.url.pathname);
+
+const copy = {
+  en: {
+    title: 'Styleguide',
+    intro: 'Design tokens and motion primitives of the "Electric" direction. Development only.',
+    colors: 'Colors',
+    contrast: 'Contrast (WCAG)',
+    type: 'Typography',
+    components: 'Components',
+    motion: 'Motion',
+    replay: 'Replay',
+    hover: 'Hover or focus me',
+    reveal: 'Scroll reveal',
+    revealHint: 'Scroll down: each block animates once when it enters the viewport.',
+    light: 'Light',
+    dark: 'Dark',
+    body: 'Software engineer building web and desktop applications, from .NET and Angular platforms to Rust desktop apps.',
+  },
+  es: {
+    title: 'Guía de estilos',
+    intro:
+      'Tokens de diseño y primitivas de animación de la dirección "Eléctrico". Solo en desarrollo.',
+    colors: 'Colores',
+    contrast: 'Contraste (WCAG)',
+    type: 'Tipografía',
+    components: 'Componentes',
+    motion: 'Animación',
+    replay: 'Repetir',
+    hover: 'Pasa el cursor o enfoca',
+    reveal: 'Aparición al hacer scroll',
+    revealHint: 'Baja: cada bloque se anima una vez al entrar en pantalla.',
+    light: 'Claro',
+    dark: 'Oscuro',
+    body: 'Ingeniero de software que crea aplicaciones web y de escritorio, desde plataformas .NET y Angular hasta apps de escritorio en Rust.',
+  },
+}[locale];
+
+const tokens = Object.keys(palette.light) as ColorToken[];
+
+const typeScale = [
+  {
+    name: 'text-hero',
+    className: 'font-display text-hero font-extrabold',
+    sample: 'Kevin De Jesús',
+  },
+  {
+    name: 'text-headline',
+    className: 'font-display text-headline font-extrabold',
+    sample: 'Projects',
+  },
+  { name: 'text-title', className: 'font-display text-title font-bold', sample: 'GAP Skipa VN' },
+  { name: 'body', className: 'text-base', sample: copy.body },
+  { name: 'label', className: 'label', sample: 'Mar 2025 — Jun 2025' },
+];
+
+const durations = ['--duration-fast', '--duration-base', '--duration-slow'];
+---
+
+<BaseLayout title={`${copy.title} · KF`}>
+  <div class="mx-auto grid max-w-6xl gap-20 px-4 py-16 sm:px-6">
+    <header class="grid gap-4">
+      <p class="label">Dev only · /styleguide</p>
+      <h1 class="font-display text-headline font-extrabold">{copy.title}</h1>
+      <p class="max-w-prose text-muted">{copy.intro}</p>
+    </header>
+
+    <section class="grid gap-6">
+      <h2 class="font-display text-title font-bold">{copy.colors}</h2>
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
+        {tokens.map((token) => (
+          <div class="overflow-hidden rounded-card border border-line bg-surface">
+            <div class="h-16" style={`background: var(--${token})`} />
+            <div class="grid gap-0.5 p-3 font-mono text-xs">
+              <span class="text-fg">--{token}</span>
+              <span class="text-muted">
+                {palette.light[token]} / {palette.dark[token]}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <h3 class="label mt-4">{copy.contrast}</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[480px] font-mono text-sm tabular-nums">
+          <thead class="text-left text-muted">
+            <tr>
+              <th class="py-2 font-normal">Pair</th>
+              <th class="py-2 font-normal">{copy.light}</th>
+              <th class="py-2 font-normal">{copy.dark}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {contrastPairs.map(([text, background]) => (
+              <tr class="border-t border-line">
+                <td class="py-2">
+                  {text} / {background}
+                </td>
+                {(['light', 'dark'] as const).map((theme) => {
+                  const ratio = contrastRatio(palette[theme][text], palette[theme][background]);
+                  return (
+                    <td class="py-2">
+                      {ratio.toFixed(2)}:1 · {wcagGrade(ratio)}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid gap-6">
+      <h2 class="font-display text-title font-bold">{copy.type}</h2>
+      <p class="label">Unbounded (display) · JetBrains Mono (body, mono)</p>
+      <div class="grid gap-8">
+        {typeScale.map(({ name, className, sample }) => (
+          <div class="grid gap-2 border-t border-line pt-4">
+            <span class="label">{name}</span>
+            <p class={className}>{sample}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid gap-6">
+      <h2 class="font-display text-title font-bold">{copy.components}</h2>
+      <div class="flex flex-wrap items-center gap-4">
+        <a
+          href="#"
+          class="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink transition-transform duration-(--duration-fast) ease-spring hover:-translate-y-0.5 active:translate-y-0"
+        >
+          Primary
+        </a>
+        <a
+          href="#"
+          class="rounded-full border border-line px-5 py-2.5 text-sm transition-colors duration-(--duration-fast) hover:border-accent-text hover:text-accent-text"
+        >
+          Secondary
+        </a>
+        <span class="rounded-full border border-current px-3 py-1 font-mono text-xs uppercase text-muted">
+          ASP.NET Core
+        </span>
+        <span class="rounded-full border border-current px-3 py-1 font-mono text-xs uppercase text-accent-text">
+          Rust
+        </span>
+      </div>
+      <div class="w-full max-w-sm rounded-card border border-line bg-surface p-6">
+        <p class="label">Surface</p>
+        <p class="mt-2 font-display text-title font-bold">Card</p>
+        <p class="mt-2 text-sm text-muted">rounded-card · border-line · bg-surface</p>
+      </div>
+    </section>
+
+    <section class="grid gap-8">
+      <h2 class="font-display text-title font-bold">{copy.motion}</h2>
+
+      <div class="grid gap-3">
+        <div class="flex items-center justify-between gap-4">
+          <span class="label">SplitText · rise</span>
+          <button
+            type="button"
+            class="rounded-full border border-line px-4 py-1.5 text-sm hover:border-accent-text"
+            data-replay
+          >
+            ↻ {copy.replay}
+          </button>
+        </div>
+        <p class="font-display text-headline font-extrabold" data-replay-target>
+          <SplitText text="Software Engineer" />
+        </p>
+      </div>
+
+      <div class="grid gap-3">
+        <span class="label">ease-spring · ease-out-expo · ease-flip</span>
+        <div class="grid gap-3 sm:grid-cols-3">
+          {['ease-spring', 'ease-out-expo', 'ease-flip'].map((ease) => (
+            <button
+              type="button"
+              class="ease-demo rounded-card border border-line bg-surface p-5 text-left"
+              style={`--demo-ease: var(--${ease})`}
+            >
+              <span class="block font-mono text-xs text-muted">{ease}</span>
+              <span class="mt-4 block size-8 rounded-full bg-accent" />
+              <span class="mt-4 block text-sm">{copy.hover}</span>
+            </button>
+          ))}
+        </div>
+        <p class="font-mono text-xs text-muted">
+          {durations.map((d) => `${d}`).join(' · ')} = 180ms · 320ms · 560ms
+        </p>
+      </div>
+
+      <div class="grid gap-6">
+        <span class="label">{copy.reveal}</span>
+        <p class="text-sm text-muted">{copy.revealHint}</p>
+        <div class="grid gap-4 pt-[40vh] sm:grid-cols-3">
+          <div data-reveal class="rounded-card border border-line bg-surface p-6">
+            data-reveal="up"
+          </div>
+          <div data-reveal="fade" class="rounded-card border border-line bg-surface p-6">
+            data-reveal="fade"
+          </div>
+          <div data-reveal="scale" class="rounded-card border border-line bg-surface p-6">
+            data-reveal="scale"
+          </div>
+        </div>
+        <ul data-reveal data-reveal-stagger class="grid gap-2 font-mono text-sm">
+          <li class="rounded-full border border-line px-4 py-2">data-reveal-stagger · 1</li>
+          <li class="rounded-full border border-line px-4 py-2">data-reveal-stagger · 2</li>
+          <li class="rounded-full border border-line px-4 py-2">data-reveal-stagger · 3</li>
+          <li class="rounded-full border border-line px-4 py-2">data-reveal-stagger · 4</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .ease-demo span:nth-child(2) {
+    transition: transform var(--duration-slow) var(--demo-ease);
+  }
+  .ease-demo:hover span:nth-child(2),
+  .ease-demo:focus-visible span:nth-child(2) {
+    transform: translateX(calc(100% + 4rem)) scale(1.2);
+  }
+</style>
+
+<script>
+  // Restarts the CSS rise animation of every character.
+  document.querySelector('[data-replay]')?.addEventListener('click', () => {
+    document.querySelectorAll<HTMLElement>('[data-replay-target] .char').forEach((char) => {
+      char.getAnimations().forEach((animation) => {
+        animation.cancel();
+        animation.play();
+      });
+    });
+  });
+</script>
