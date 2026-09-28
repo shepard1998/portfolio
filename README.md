@@ -1,22 +1,24 @@
-# Kevin Fernández — Portfolio
+# Kevin De Jesús Fernández — Portfolio
 
-Personal portfolio of **Kevin Fernández**, software engineer. It showcases projects, professional experience and skills, in **English** and **Spanish**.
+Personal portfolio of **Kevin De Jesús Fernández**, software engineer. It showcases projects, professional experience and skills, in **English** and **Spanish**.
 
-> **Status:** in development. The project foundation is ready (Astro, Tailwind CSS, i18n, quality tooling); the design system and sections are next. See the [roadmap](#roadmap).
+> **Status:** in development. The foundation and the design system are ready (light/dark themes, typography, motion primitives); the content sections are next. See the [roadmap](#roadmap).
 
 ---
 
 ## Tech stack
 
-| Layer      | Technology                                                                   |
-| ---------- | ---------------------------------------------------------------------------- |
-| Framework  | [Astro 7](https://astro.build) — static output, zero JavaScript by default   |
-| Language   | TypeScript (strict)                                                          |
-| Styling    | [Tailwind CSS 4](https://tailwindcss.com) via `@tailwindcss/vite`            |
-| i18n       | Astro i18n routing — English at `/`, Spanish at `/es/`                       |
-| Tests      | [Vitest](https://vitest.dev)                                                 |
-| Quality    | `astro check`, ESLint (`typescript-eslint`, `eslint-plugin-astro`), Prettier |
-| Deployment | [Vercel](https://vercel.com) (planned)                                       |
+| Layer      | Technology                                                                                   |
+| ---------- | -------------------------------------------------------------------------------------------- |
+| Framework  | [Astro 7](https://astro.build) — static output, zero JavaScript by default                   |
+| Language   | TypeScript (strict)                                                                          |
+| Styling    | [Tailwind CSS 4](https://tailwindcss.com) via `@tailwindcss/vite`                            |
+| Motion     | CSS animations, View Transitions and [Motion](https://motion.dev) (`inView`, mini `animate`) |
+| Fonts      | Unbounded + JetBrains Mono, self-hosted with the Astro Fonts API (Fontsource)                |
+| i18n       | Astro i18n routing — English at `/`, Spanish at `/es/`                                       |
+| Tests      | [Vitest](https://vitest.dev)                                                                 |
+| Quality    | `astro check`, ESLint (`typescript-eslint`, `eslint-plugin-astro`), Prettier                 |
+| Deployment | [Vercel](https://vercel.com) (planned)                                                       |
 
 ---
 
@@ -38,6 +40,10 @@ npm run dev
 
 The site runs at <http://localhost:4321> (English) and <http://localhost:4321/es/> (Spanish).
 
+The first `dev` or `build` downloads the fonts from Fontsource, so it needs an internet connection.
+
+The **styleguide** with every design token and animation is available at <http://localhost:4321/styleguide> (and `/es/styleguide`) while `npm run dev` is running. It is never included in the production build.
+
 ### Scripts
 
 | Script                 | Description                              |
@@ -58,11 +64,13 @@ The site runs at <http://localhost:4321> (English) and <http://localhost:4321/es
 
 ```text
 src/
-├── components/     # Astro components (pages share one component per locale)
+├── components/     # Astro components: header, footer, theme toggle, SplitText…
+├── dev/styleguide/ # Development-only styleguide page and the integration that serves it
 ├── i18n/           # Locale config, UI dictionaries and helpers (+ tests)
-├── layouts/        # Base HTML layout
+├── layouts/        # Base HTML layout (fonts, theme script, header, footer)
+├── lib/            # Framework-free logic: theme, contrast, motion helpers (+ tests)
 ├── pages/          # Routes: `/` (English) and `/es/` (Spanish)
-└── styles/         # Global CSS (Tailwind entry point)
+└── styles/         # Global CSS with design tokens, and the palette used by tests
 public/             # Static assets served as-is
 ```
 
@@ -72,6 +80,17 @@ public/             # Static assets served as-is
 - UI strings live in `src/i18n/ui.ts`. Every locale must define every key of the English dictionary (enforced by TypeScript and by a unit test).
 - Components read text with `useTranslations(locale)`; no UI text is hard-coded in components.
 - Each page exists once per locale (`src/pages/index.astro`, `src/pages/es/index.astro`) and renders a shared component.
+
+### Design system
+
+- **Direction "Electric":** Unbounded for display text, JetBrains Mono for body and labels, a blue-black / lavender-white palette with an electric blue accent.
+- **Tokens** live in `src/styles/global.css` as CSS custom properties and are exposed to Tailwind (`bg-bg`, `text-fg`, `text-muted`, `bg-accent`, `text-hero`, `ease-spring`…). `src/styles/palette.ts` mirrors the colors; a unit test keeps both in sync and checks that every text/background pair meets WCAG AA in both themes.
+- **Themes:** light and dark. The system preference is used until the visitor picks one; the choice is stored in `localStorage`. An inline script in `<head>` applies it before the first paint (no flash), and the toggle animates the change with a circular View Transition.
+- **Motion:** only `transform` and `opacity` are animated, in 180–560 ms.
+  - `<SplitText>` makes characters rise on load (CSS only).
+  - `data-reveal="up | fade | scale"` reveals an element when it scrolls into view.
+  - `data-reveal-stagger` reveals its children one after another.
+  - Everything is disabled when the visitor prefers reduced motion.
 
 ---
 
@@ -88,7 +107,7 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org) (`fea
 ## Roadmap
 
 - [x] Project setup: Astro, Tailwind CSS, i18n, quality tooling
-- [ ] Visual direction and design system (light/dark themes, typography, motion)
+- [x] Visual direction and design system (light/dark themes, typography, motion)
 - [ ] Hero and flippable contact card
 - [ ] Projects shown as open folders with looping video previews
 - [ ] Professional experience timeline with expandable nodes
