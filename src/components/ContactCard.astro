@@ -1,0 +1,366 @@
+---
+import { displayUrl, profile } from '../data/profile';
+import { getLocaleFromPath, useTranslations } from '../i18n/utils';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const t = useTranslations(getLocaleFromPath(Astro.url.pathname));
+
+const links = [
+  { label: t('card.linkedin'), href: profile.links.linkedin },
+  { label: t('card.github'), href: profile.links.github },
+];
+
+const flipIcon = 'M3 12a9 9 0 0 1 15.3-6.4L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.3 6.4L3 16M3 21v-5h5';
+---
+
+<!--
+  Both faces share one grid cell, so the card is as tall as its longest face and text never
+  overflows. Clicking anywhere except a link or button flips it; the corner button does the
+  same for keyboard users. The hidden face is inert so it is skipped by keyboard and screen
+  readers.
+-->
+<div
+  class:list={['card-scene', className]}
+  role="group"
+  aria-label={t('card.label')}
+  data-contact-card
+>
+  <div class="card-tilt">
+    <div class="card" data-flipped="false">
+      <section class="face front" data-face="front">
+        <span class="glare" aria-hidden="true"></span>
+        <div class="flex items-start justify-between gap-4">
+          <span class="font-display text-3xl leading-none font-extrabold tracking-tighter">
+            {profile.initials}
+            <span class="text-accent-text">.</span>
+          </span>
+          <button type="button" class="flip-btn" data-flip aria-label={t('card.showBack')}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d={flipIcon}></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="grid gap-1.5">
+          <h2 class="font-display text-title font-bold">{profile.fullName}</h2>
+          <p class="label">{t('card.role')}</p>
+        </div>
+
+        <dl class="grid gap-2 text-sm">
+          <div class="row">
+            <dt>{t('card.email')}</dt>
+            <dd class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+              <a href={`mailto:${profile.email}`} class="link wrap-anywhere" data-email>
+                {profile.email}
+              </a>
+              <button
+                type="button"
+                class="copy-btn"
+                data-copy={profile.email}
+                aria-label={t('card.copyEmail')}
+              >
+                <span class="copy-idle">{t('card.copy')}</span>
+                <span class="copy-done" aria-hidden="true">
+                  {t('card.copied')} ✓
+                </span>
+              </button>
+              <span class="sr-only" aria-live="polite" data-copy-status></span>
+            </dd>
+          </div>
+          {links.map(({ label, href }) => (
+            <div class="row">
+              <dt>{label}</dt>
+              <dd class="min-w-0">
+                <a href={href} class="link wrap-anywhere" target="_blank" rel="noopener noreferrer">
+                  {displayUrl(href)}
+                  <span aria-hidden="true"> ↗</span>
+                </a>
+              </dd>
+            </div>
+          ))}
+          <div class="row">
+            <dt>{t('card.location')}</dt>
+            <dd>{t('card.locationValue')}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="face back" data-face="back" aria-hidden="true" inert>
+        <div class="flex items-start justify-between gap-4">
+          <h2 class="font-mono text-label tracking-(--text-label--letter-spacing) uppercase">
+            {t('card.aboutTitle')}
+          </h2>
+          <button type="button" class="flip-btn" data-flip aria-label={t('card.showFront')}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d={flipIcon}></path>
+            </svg>
+          </button>
+        </div>
+        <p class="text-sm leading-relaxed sm:text-[0.9375rem]">{t('card.about')}</p>
+        <div class="grid gap-1 text-sm">
+          <span class="font-mono text-label tracking-(--text-label--letter-spacing) uppercase opacity-75">
+            {t('card.languages')}
+          </span>
+          <span>{t('card.languagesValue')}</span>
+        </div>
+      </section>
+    </div>
+  </div>
+  <p class="label mt-4 text-center" aria-hidden="true">
+    {t('card.hint')}
+  </p>
+</div>
+
+<style>
+  .card-scene {
+    perspective: 1400px;
+  }
+
+  .card-tilt {
+    transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transform-style: preserve-3d;
+    transition: transform 240ms var(--ease-out-expo);
+  }
+
+  .card {
+    display: grid;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 720ms var(--ease-flip);
+  }
+  .card[data-flipped='true'] {
+    transform: rotateY(180deg);
+  }
+
+  .face {
+    grid-area: 1 / 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 20rem;
+    padding: clamp(1.25rem, 4vw, 1.75rem);
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .front {
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  /* Decorative orbit in the top-right corner. */
+  .front::after {
+    content: '';
+    position: absolute;
+    top: -70px;
+    right: -70px;
+    width: 200px;
+    height: 200px;
+    border: 1px solid var(--accent-text);
+    border-radius: 50%;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  /* Soft light that follows the cursor while tilting. */
+  .glare {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at var(--glare-x, 50%) var(--glare-y, 0%),
+      color-mix(in srgb, var(--accent) 16%, transparent),
+      transparent 55%
+    );
+    opacity: var(--glare-opacity, 0);
+    transition: opacity var(--duration-base);
+    pointer-events: none;
+  }
+
+  .back {
+    transform: rotateY(180deg);
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  /* Label above value: long URLs get the full card width and wrap instead of being cut. */
+  .row {
+    display: grid;
+    gap: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .row dt {
+    color: var(--muted);
+    font-size: var(--text-label);
+    letter-spacing: var(--text-label--letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .link {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 4px;
+    transition:
+      color var(--duration-fast),
+      text-decoration-color var(--duration-fast);
+  }
+  .link:hover {
+    color: var(--accent-text);
+    text-decoration-color: currentColor;
+  }
+
+  .flip-btn {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    opacity: 0.8;
+    transition:
+      transform var(--duration-base) var(--ease-spring),
+      opacity var(--duration-fast);
+  }
+  .flip-btn:hover {
+    opacity: 1;
+    transform: rotate(180deg);
+  }
+  .flip-btn svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Both labels share one cell so "Copied" never changes the button width. */
+  .copy-btn {
+    display: grid;
+    flex: none;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: var(--text-label);
+    letter-spacing: var(--text-label--letter-spacing);
+    text-transform: uppercase;
+    color: var(--muted);
+    transition:
+      color var(--duration-fast),
+      border-color var(--duration-fast);
+  }
+  .copy-btn:hover {
+    color: var(--accent-text);
+    border-color: var(--accent-text);
+  }
+  .copy-btn > span {
+    grid-area: 1 / 1;
+    text-align: center;
+    transition:
+      opacity var(--duration-fast),
+      transform var(--duration-base) var(--ease-spring);
+  }
+  .copy-done {
+    opacity: 0;
+    transform: translateY(6px);
+    color: var(--accent-text);
+  }
+  .copy-btn[data-copied] .copy-idle {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  .copy-btn[data-copied] .copy-done {
+    opacity: 1;
+    transform: none;
+  }
+</style>
+
+<script>
+  const MAX_TILT_DEG = 7;
+
+  document.querySelectorAll<HTMLElement>('[data-contact-card]').forEach((scene) => {
+    const tilt = scene.querySelector<HTMLElement>('.card-tilt');
+    const card = scene.querySelector<HTMLElement>('.card');
+    const faces = {
+      front: scene.querySelector<HTMLElement>('[data-face="front"]'),
+      back: scene.querySelector<HTMLElement>('[data-face="back"]'),
+    };
+    if (!tilt || !card || !faces.front || !faces.back) return;
+
+    const setFlipped = (flipped: boolean, moveFocus: boolean) => {
+      card.dataset.flipped = String(flipped);
+      const visible = flipped ? faces.back : faces.front;
+      const hidden = flipped ? faces.front : faces.back;
+      visible?.removeAttribute('aria-hidden');
+      visible?.removeAttribute('inert');
+      hidden?.setAttribute('aria-hidden', 'true');
+      hidden?.setAttribute('inert', '');
+      if (moveFocus) visible?.querySelector<HTMLElement>('[data-flip]')?.focus();
+    };
+
+    card.addEventListener('click', (event) => {
+      const target = event.target as Element;
+      const flipButton = target.closest('[data-flip]');
+      // Links and other buttons keep their own behavior.
+      if (!flipButton && target.closest('a, button')) return;
+      // Selecting text should not flip the card.
+      if (!flipButton && window.getSelection()?.toString()) return;
+      setFlipped(card.dataset.flipped !== 'true', flipButton !== null);
+    });
+
+    // Copy the email address, with a visible confirmation that does not shift the layout.
+    scene.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
+      let timer: number | undefined;
+      const status = scene.querySelector<HTMLElement>('[data-copy-status]');
+      const done = button.querySelector('.copy-done')?.textContent ?? '';
+      button.addEventListener('click', async () => {
+        const value = button.dataset.copy ?? '';
+        try {
+          await navigator.clipboard.writeText(value);
+        } catch {
+          // Clipboard blocked: select the address so it can be copied manually.
+          const email = scene.querySelector('[data-email]');
+          if (email) window.getSelection()?.selectAllChildren(email);
+          return;
+        }
+        button.toggleAttribute('data-copied', true);
+        if (status) status.textContent = done;
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          button.removeAttribute('data-copied');
+          if (status) status.textContent = '';
+        }, 1800);
+      });
+    });
+
+    // Subtle 3D tilt and glare that follow the mouse.
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    scene.addEventListener('pointermove', (event) => {
+      if (event.pointerType !== 'mouse' || reduceMotion.matches) return;
+      const rect = scene.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      tilt.style.setProperty('--tilt-y', `${(x - 0.5) * 2 * MAX_TILT_DEG}deg`);
+      tilt.style.setProperty('--tilt-x', `${(0.5 - y) * 2 * MAX_TILT_DEG}deg`);
+      faces.front?.style.setProperty('--glare-x', `${x * 100}%`);
+      faces.front?.style.setProperty('--glare-y', `${y * 100}%`);
+      faces.front?.style.setProperty('--glare-opacity', '1');
+    });
+    scene.addEventListener('pointerleave', () => {
+      tilt.style.setProperty('--tilt-x', '0deg');
+      tilt.style.setProperty('--tilt-y', '0deg');
+      faces.front?.style.setProperty('--glare-opacity', '0');
+    });
+  });
+</script>
