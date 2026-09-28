@@ -8,63 +8,65 @@ const t = useTranslations(getLocaleFromPath(Astro.url.pathname));
 ---
 
 <!--
+  Two columns on large screens (name and copy on the left, contact card on the right) sized to
+  fit the first screen without scrolling; stacked on smaller screens.
   Entrance sequence (CSS only): the name rises letter by letter, then the tagline, the buttons
   and the contact card follow with staggered delays.
 -->
 <section
   id="about"
-  class="mx-auto grid max-w-6xl gap-10 px-4 pt-12 pb-16 sm:px-6 sm:pt-20 lg:gap-14"
+  class="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-10 pb-16 sm:px-6 sm:pt-16 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16 lg:py-6"
 >
-  <p class="label flex animate-enter items-center gap-3">
-    <span class="relative flex size-2" aria-hidden="true">
-      <span class="absolute inline-flex size-full animate-ping rounded-full bg-accent opacity-60"></span>
-      <span class="relative inline-flex size-2 rounded-full bg-accent"></span>
-    </span>
-    {t('hero.eyebrow')}
-  </p>
+  <div class="grid gap-8 lg:gap-10">
+    <p class="label flex animate-enter items-center gap-3">
+      <span class="relative flex size-2" aria-hidden="true">
+        <span class="absolute inline-flex size-full animate-ping rounded-full bg-accent opacity-60"></span>
+        <span class="relative inline-flex size-2 rounded-full bg-accent"></span>
+      </span>
+      {t('hero.eyebrow')}
+    </p>
 
-  <h1 class="font-display text-hero font-extrabold">
-    <SplitText text={profile.heroName} />
-  </h1>
+    <h1 class="font-display text-hero font-extrabold lg:text-hero-split">
+      <SplitText text={profile.heroName} />
+    </h1>
 
-  <div class="grid items-end gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]">
-    <div class="grid gap-8 self-start lg:pt-4">
-      <p class="max-w-[38ch] animate-enter text-lg text-balance [animation-delay:450ms] sm:text-xl">
-        {t('hero.tagline')}
-      </p>
-      <div class="flex animate-enter flex-wrap gap-3 [animation-delay:560ms]">
-        <a
-          href="#projects"
-          class="group inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-ink transition-transform duration-(--duration-fast) ease-spring hover:-translate-y-0.5"
-        >
-          {t('hero.ctaProjects')}
-          <span
-            class="transition-transform duration-(--duration-base) ease-spring group-hover:translate-y-0.5"
-            aria-hidden="true"
-          >
-            ↓
-          </span>
-        </a>
-        <a
-          href="#contact"
-          class="inline-flex items-center rounded-full border border-line px-6 py-3 text-sm transition-colors duration-(--duration-fast) hover:border-accent-text hover:text-accent-text"
-        >
-          {t('hero.ctaContact')}
-        </a>
-      </div>
-      <div
-        class="mt-6 hidden animate-enter items-center gap-3 [animation-delay:900ms] lg:flex"
-        aria-hidden="true"
+    <p class="max-w-[38ch] animate-enter text-lg text-balance [animation-delay:450ms] sm:text-xl">
+      {t('hero.tagline')}
+    </p>
+
+    <div class="flex animate-enter flex-wrap gap-3 [animation-delay:560ms]">
+      <a
+        href="#projects"
+        class="group inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-ink transition-transform duration-(--duration-fast) ease-spring hover:-translate-y-0.5"
       >
-        <span class="relative h-10 w-px overflow-hidden bg-line">
-          <span class="absolute inset-0 animate-scroll-cue bg-accent-text"></span>
+        {t('hero.ctaProjects')}
+        <span
+          class="transition-transform duration-(--duration-base) ease-spring group-hover:translate-y-0.5"
+          aria-hidden="true"
+        >
+          ↓
         </span>
-        <span class="label">{t('hero.scroll')}</span>
-      </div>
+      </a>
+      <a
+        href="#contact"
+        class="inline-flex items-center rounded-full border border-line px-6 py-3 text-sm transition-colors duration-(--duration-fast) hover:border-accent-text hover:text-accent-text"
+      >
+        {t('hero.ctaContact')}
+      </a>
     </div>
 
-    <div id="contact" class="animate-card-in scroll-mt-24 [animation-delay:600ms]">
-      <ContactCard />
+    <div
+      class="hidden animate-enter items-center gap-3 [animation-delay:900ms] lg:[@media(min-height:760px)]:flex"
+      aria-hidden="true"
+    >
+      <span class="relative h-10 w-px overflow-hidden bg-line">
+        <span class="absolute inset-0 animate-scroll-cue bg-accent-text"></span>
+      </span>
+      <span class="label">{t('hero.scroll')}</span>
     </div>
+  </div>
+
+  <div id="contact" class="animate-card-in scroll-mt-24 [animation-delay:600ms]">
+    <ContactCard />
   </div>
 </section>

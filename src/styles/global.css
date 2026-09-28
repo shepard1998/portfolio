@@ -57,6 +57,10 @@
   --text-hero: clamp(2.5rem, 10vw, 9rem);
   --text-hero--line-height: 0.95;
   --text-hero--letter-spacing: -0.04em;
+  /* Hero name when it shares the first screen with the contact card. */
+  --text-hero-split: clamp(3.25rem, 6.4vw, 6.75rem);
+  --text-hero-split--line-height: 0.95;
+  --text-hero-split--letter-spacing: -0.04em;
   --text-headline: clamp(2rem, 5.5vw, 4.5rem);
   --text-headline--line-height: 1;
   --text-headline--letter-spacing: -0.035em;
