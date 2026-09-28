@@ -1,21 +1,21 @@
 ---
+import { profile } from '../data/profile';
 import { getLocaleFromPath, useTranslations } from '../i18n/utils';
 
 const t = useTranslations(getLocaleFromPath(Astro.url.pathname));
 const year = new Date().getFullYear();
-const email = 'kevinfdez41@gmail.com';
 ---
 
 <footer class="border-t border-line">
   <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
     <p>
-      © {year} Kevin De Jesús Fernández. {t('footer.rights')}
+      © {year} {profile.fullName}. {t('footer.rights')}
     </p>
     <a
-      href={`mailto:${email}`}
+      href={`mailto:${profile.email}`}
       class="w-fit text-fg underline decoration-line underline-offset-4 transition-colors duration-(--duration-fast) hover:decoration-accent-text"
     >
-      {email}
+      {profile.email}
     </a>
     <p>{t('footer.built')}</p>
   </div>
