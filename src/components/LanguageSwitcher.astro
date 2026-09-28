@@ -7,12 +7,15 @@ const t = useTranslations(currentLocale);
 ---
 
 <nav aria-label={t('nav.language')}>
-  <ul class="flex gap-4 text-sm">
+  <ul class="flex rounded-full border border-line p-1 font-mono text-label">
     {locales.map((locale) => (
       <li>
         {locale === currentLocale ? (
-          <span aria-current="true" class="font-semibold">
-            {locale.toUpperCase()}
+          <span
+            aria-current="true"
+            class="block rounded-full bg-fg px-2.5 py-1.5 text-bg uppercase"
+          >
+            {locale}
           </span>
         ) : (
           <a
@@ -20,9 +23,9 @@ const t = useTranslations(currentLocale);
             hreflang={locale}
             lang={locale}
             aria-label={t('nav.switchTo', { language: localeNames[locale] })}
-            class="text-neutral-400 transition-colors hover:text-neutral-50"
+            class="block rounded-full px-2.5 py-1.5 text-muted uppercase transition-colors duration-(--duration-fast) hover:text-fg"
           >
-            {locale.toUpperCase()}
+            {locale}
           </a>
         )}
       </li>

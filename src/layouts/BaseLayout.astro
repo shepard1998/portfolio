@@ -1,23 +1,53 @@
 ---
 import '../styles/global.css';
 
+import { Font } from 'astro:assets';
+
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import ThemeScript from '../components/ThemeScript.astro';
 import { getLocaleFromPath, useTranslations } from '../i18n/utils';
+
+interface Props {
+  /** Overrides the default site title. */
+  title?: string;
+}
 
 const locale = getLocaleFromPath(Astro.url.pathname);
 const t = useTranslations(locale);
+const { title = t('site.title') } = Astro.props;
 ---
 
 <html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <ThemeScript />
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={t('site.description')} />
-    <title>{t('site.title')}</title>
+    <title>{title}</title>
+    <Font cssVariable="--font-unbounded" preload={[{ subset: 'latin' }]} />
+    <Font cssVariable="--font-jetbrains-mono" preload={[{ subset: 'latin' }]} />
   </head>
-  <body class="min-h-dvh bg-neutral-950 text-neutral-50 antialiased">
-    <slot />
+  <body class="flex min-h-dvh flex-col">
+    <a
+      href="#main"
+      class="sr-only z-50 rounded-full bg-accent px-4 py-2 text-accent-ink focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+    >
+      {t('nav.skip')}
+    </a>
+    <Header />
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      import { initReveal } from '../lib/reveal';
+
+      initReveal();
+    </script>
   </body>
 </html>

@@ -1,18 +1,25 @@
 ---
-import LanguageSwitcher from './LanguageSwitcher.astro';
+import SplitText from './SplitText.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getLocaleFromPath, useTranslations } from '../i18n/utils';
 
+// Temporary landing page: the real hero and sections arrive in M3–M6.
 const t = useTranslations(getLocaleFromPath(Astro.url.pathname));
 ---
 
 <BaseLayout>
-  <header class="flex justify-end p-6">
-    <LanguageSwitcher />
-  </header>
-  <main class="grid min-h-[80dvh] place-content-center px-4 text-center">
-    <p class="text-sm tracking-widest text-neutral-400 uppercase">{t('home.eyebrow')}</p>
-    <h1 class="mt-4 text-5xl font-bold tracking-tight sm:text-7xl">{t('home.title')}</h1>
-    <p class="mt-4 text-xl text-neutral-300">{t('home.subtitle')}</p>
-  </main>
+  <section class="mx-auto grid max-w-6xl gap-8 px-4 pt-16 pb-24 sm:px-6 sm:pt-28">
+    <p class="label" data-reveal="fade">
+      {t('home.eyebrow')}
+    </p>
+    <h1 class="font-display text-hero font-extrabold">
+      <SplitText text={t('home.title')} />
+    </h1>
+    <p
+      class="w-fit rounded-full bg-accent px-4 py-2 font-mono text-sm tracking-wide text-accent-ink uppercase"
+      data-reveal
+    >
+      {t('home.subtitle')}
+    </p>
+  </section>
 </BaseLayout>
