@@ -18,7 +18,7 @@ const links: { key: UiKey; hash: string }[] = [
 ---
 
 <header
-  class="site-header sticky top-0 z-40 border-b border-transparent bg-bg/80 backdrop-blur-md transition-[transform,border-color] duration-(--duration-base) ease-out-expo"
+  class="site-header sticky top-0 z-40 border-b border-transparent bg-bg/80 backdrop-blur-md transition-[border-color] duration-(--duration-base)"
   data-site-header
 >
   <div class="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
@@ -56,9 +56,6 @@ const links: { key: UiKey; hash: string }[] = [
   .site-header[data-scrolled] {
     border-color: var(--line);
   }
-  .site-header[data-hidden] {
-    transform: translateY(-100%);
-  }
   /* Underline grows from the left on hover. */
   .nav-link::after {
     content: '';
@@ -78,33 +75,11 @@ const links: { key: UiKey; hash: string }[] = [
 </style>
 
 <script>
-  import { nextHeaderHidden } from '../lib/scroll-direction';
-
+  // The header stays fixed at the top; it only gains a bottom border once the page scrolls.
   const header = document.querySelector<HTMLElement>('[data-site-header]');
   if (header) {
-    let previousY = window.scrollY;
-    let hidden = false;
-    let ticking = false;
-
-    const update = () => {
-      const y = window.scrollY;
-      hidden = nextHeaderHidden(hidden, previousY, y);
-      header.toggleAttribute('data-hidden', hidden && !header.contains(document.activeElement));
-      header.toggleAttribute('data-scrolled', y > 8);
-      previousY = y;
-      ticking = false;
-    };
-
-    window.addEventListener(
-      'scroll',
-      () => {
-        if (!ticking) {
-          ticking = true;
-          requestAnimationFrame(update);
-        }
-      },
-      { passive: true },
-    );
+    const update = () => header.toggleAttribute('data-scrolled', window.scrollY > 8);
+    window.addEventListener('scroll', update, { passive: true });
     update();
   }
 </script>
