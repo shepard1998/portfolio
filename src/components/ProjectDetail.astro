@@ -1,0 +1,171 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+
+import ProjectPreview from './ProjectPreview.astro';
+import SplitText from './SplitText.astro';
+import type { Project } from '../data/projects';
+import { getLocaleFromPath, localizePath, useTranslations } from '../i18n/utils';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { caseNumber } from '../lib/projects';
+
+interface Props {
+  project: Project;
+  index: number;
+  next?: Project;
+}
+
+const { project, index, next } = Astro.props;
+const locale = getLocaleFromPath(Astro.url.pathname);
+const t = useTranslations(locale);
+const { title, summary, year, role, stack, links, gallery, sample } = project.data;
+const { Content } = await render(project.entry);
+const projectsHref = `${localizePath('/', locale)}#projects`;
+---
+
+<BaseLayout title={`${title} — ${t('project.titleSuffix')}`}>
+  <article class="mx-auto grid max-w-6xl gap-14 px-4 pt-10 pb-24 sm:px-6 lg:gap-20 lg:pt-14">
+    <header class="grid gap-8">
+      <a
+        href={projectsHref}
+        class="group label flex w-fit items-center gap-2 transition-colors duration-(--duration-fast) hover:text-fg"
+      >
+        <span
+          class="transition-transform duration-(--duration-base) ease-spring group-hover:-translate-x-1"
+          aria-hidden="true"
+        >
+          ←
+        </span>
+        {t('project.back')}
+      </a>
+
+      <div class="grid gap-5">
+        <p class="label flex flex-wrap items-center gap-3 animate-enter">
+          {t('projects.case', { number: caseNumber(index) })} · {year}
+          {sample && (
+            <span class="rounded-full border border-accent-text px-2.5 py-0.5 text-accent-text">
+              {t('projects.sample')}
+            </span>
+          )}
+        </p>
+        <h1 class="font-display text-headline font-extrabold">
+          <SplitText text={title} />
+        </h1>
+        <p class="max-w-[52ch] animate-enter text-lg text-muted [animation-delay:350ms]">
+          {summary}
+        </p>
+      </div>
+
+      <dl class="grid animate-enter gap-6 border-t border-line pt-6 text-sm [animation-delay:450ms] sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid content-start gap-2">
+          <dt class="label">{t('project.role')}</dt>
+          <dd>{role}</dd>
+        </div>
+        <div class="grid content-start gap-2">
+          <dt class="label">{t('project.year')}</dt>
+          <dd>{year}</dd>
+        </div>
+        <div class="grid content-start gap-2">
+          <dt class="label">{t('project.stack')}</dt>
+          <dd class="flex flex-wrap gap-1.5">
+            {stack.map((tech) => (
+              <span class="rounded-full border border-line px-2.5 py-0.5 font-mono text-xs">
+                {tech}
+              </span>
+            ))}
+          </dd>
+        </div>
+        <div class="grid content-start gap-2">
+          <dt class="label">{t('project.links')}</dt>
+          <dd class="grid gap-1">
+            {links.live && (
+              <a href={links.live} target="_blank" rel="noopener noreferrer" class="link-arrow">
+                {t('project.live')} ↗
+              </a>
+            )}
+            {links.repo && (
+              <a href={links.repo} target="_blank" rel="noopener noreferrer" class="link-arrow">
+                {t('project.repo')} ↗
+              </a>
+            )}
+            {!links.live && !links.repo && <span class="text-muted">{t('project.noLinks')}</span>}
+          </dd>
+        </div>
+      </dl>
+    </header>
+
+    <ProjectPreview
+      project={project}
+      index={index}
+      mode="hero"
+      class="rounded-card border border-line shadow-2xl shadow-black/20"
+    />
+
+    {sample && (
+      <p class="rounded-card border border-dashed border-accent-text px-5 py-4 text-sm text-accent-text">
+        {t('project.sampleNotice')}
+      </p>
+    )}
+
+    <div class="case-study" data-reveal>
+      <Content />
+    </div>
+
+    {gallery.length > 0 && (
+      <section class="grid gap-6" aria-labelledby="gallery-title">
+        <h2 id="gallery-title" class="font-display text-title font-bold" data-reveal>
+          {t('project.gallery')}
+        </h2>
+        <div class="grid gap-6 md:grid-cols-2" data-reveal data-reveal-stagger>
+          {gallery.map((image, i) => (
+            <figure class:list={['group grid gap-3', i === 0 && 'md:col-span-2']}>
+              <div class="overflow-hidden rounded-card border border-line">
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  class="w-full transition-transform duration-(--duration-slow) ease-out-expo group-hover:scale-[1.03]"
+                  loading="lazy"
+                />
+              </div>
+              {image.caption && <figcaption class="label">{image.caption}</figcaption>}
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {next && (
+      <a
+        href={localizePath(`/projects/${next.slug}`, locale)}
+        class="group grid gap-3 rounded-card border border-line bg-surface p-8 transition-colors duration-(--duration-base) hover:border-accent-text sm:p-10"
+        data-reveal
+      >
+        <span class="label">{t('project.next')}</span>
+        <span class="flex items-center justify-between gap-6">
+          <span class="font-display text-headline font-extrabold transition-colors duration-(--duration-fast) group-hover:text-accent-text">
+            {next.data.title}
+          </span>
+          <span
+            class="text-3xl transition-transform duration-(--duration-base) ease-spring group-hover:translate-x-2"
+            aria-hidden="true"
+          >
+            →
+          </span>
+        </span>
+      </a>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .link-arrow {
+    width: fit-content;
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-underline-offset: 4px;
+    transition: text-decoration-color var(--duration-fast);
+  }
+  .link-arrow:hover {
+    text-decoration-color: var(--accent-text);
+  }
+</style>

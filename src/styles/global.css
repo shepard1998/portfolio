@@ -130,6 +130,26 @@
   }
 }
 
+/*
+ * Cross-document view transitions: pages cross-fade, and a project preview morphs from its
+ * folder into the detail page (shared `view-transition-name`). Unsupported browsers navigate
+ * normally.
+ */
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+::view-transition-group(*) {
+  animation-duration: 480ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @layer base {
   :root {
     --duration-fast: 180ms;
@@ -176,4 +196,53 @@
 
 @utility label {
   @apply font-mono text-label text-muted uppercase;
+}
+
+/* Long-form text of a project case study (rendered Markdown). */
+@layer components {
+  .case-study {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 68ch;
+    line-height: 1.75;
+  }
+  .case-study h2 {
+    margin-top: 1.5rem;
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-weight: 700;
+    line-height: var(--text-title--line-height);
+    letter-spacing: var(--text-title--letter-spacing);
+  }
+  .case-study h2:first-child {
+    margin-top: 0;
+  }
+  .case-study p {
+    color: var(--muted);
+  }
+  .case-study ul {
+    display: grid;
+    gap: 0.6rem;
+  }
+  .case-study li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .case-study li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 0.6rem;
+    height: 2px;
+    background: var(--accent-text);
+  }
+  .case-study a {
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .case-study strong {
+    color: var(--fg);
+  }
 }
