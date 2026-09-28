@@ -59,6 +59,17 @@ const en = {
   'project.sampleNotice':
     'This is a sample project. Text, video and images are placeholders until the real case study is published.',
   'project.titleSuffix': 'Project by Kevin De Jesús Fernández',
+  'experience.eyebrow': 'Career',
+  'experience.title': 'Experience',
+  'experience.role': 'Software Engineer',
+  'experience.present': 'Present',
+  'experience.projectsCount': '{count} projects',
+  'experience.notice':
+    "Projects developed during my work at NTSprint LLC for its clients. I'm not authorized to show code, screenshots or internal details, so only my participation is described.",
+  'experience.expandAll': 'Expand all',
+  'experience.collapseAll': 'Collapse all',
+  'experience.stack': 'Stack',
+  'experience.participation': 'Participation',
   'footer.rights': 'All rights reserved.',
   'footer.built': 'Built with Astro and Tailwind CSS.',
 } as const;
@@ -127,6 +138,17 @@ export const ui: Record<Locale, Record<UiKey, string>> = {
     'project.sampleNotice':
       'Este es un proyecto de ejemplo. El texto, el video y las imágenes son provisionales hasta que se publique el caso real.',
     'project.titleSuffix': 'Proyecto de Kevin De Jesús Fernández',
+    'experience.eyebrow': 'Trayectoria',
+    'experience.title': 'Experiencia',
+    'experience.role': 'Ingeniero de Software',
+    'experience.present': 'Actualidad',
+    'experience.projectsCount': '{count} proyectos',
+    'experience.notice':
+      'Proyectos desarrollados durante mi trabajo en NTSprint LLC para sus clientes. No tengo autorización para mostrar código, capturas ni detalles internos, así que solo describo mi participación.',
+    'experience.expandAll': 'Desplegar todo',
+    'experience.collapseAll': 'Plegar todo',
+    'experience.stack': 'Stack',
+    'experience.participation': 'Participación',
     'footer.rights': 'Todos los derechos reservados.',
     'footer.built': 'Hecho con Astro y Tailwind CSS.',
   },

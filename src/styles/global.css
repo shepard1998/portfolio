@@ -152,6 +152,8 @@
 
 @layer base {
   :root {
+    /* Lets <details> animate to its natural (auto) height. */
+    interpolate-size: allow-keywords;
     --duration-fast: 180ms;
     --duration-base: 320ms;
     --duration-slow: 560ms;

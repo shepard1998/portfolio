@@ -1,0 +1,318 @@
+---
+import SplitText from './SplitText.astro';
+import { company, experience } from '../data/experience';
+import { getLocaleFromPath, useTranslations } from '../i18n/utils';
+import { formatDuration, formatRange, monthsInclusive } from '../lib/dates';
+
+const locale = getLocaleFromPath(Astro.url.pathname);
+const t = useTranslations(locale);
+const present = t('experience.present');
+
+const items = experience.map((project) => ({
+  ...project,
+  range: formatRange(project.start, project.end, locale, present),
+  duration: formatDuration(monthsInclusive(project.start, project.end), locale),
+}));
+---
+
+<!--
+  NTSprint timeline. Each node is a native <details>, so it works and stays accessible without
+  JavaScript; supporting browsers animate its height. The accent line draws itself while the
+  list scrolls through the viewport (CSS scroll-driven animation, static line elsewhere).
+-->
+<section id="experience" class="scroll-mt-16 border-t border-line">
+  <div class="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 lg:py-28">
+    <header class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-end">
+      <div class="grid gap-4">
+        <p class="label" data-reveal="fade">
+          {t('experience.eyebrow')}
+        </p>
+        <h2 class="font-display text-headline font-extrabold">
+          <SplitText text={t('experience.title')} onView />
+        </h2>
+      </div>
+
+      <div class="grid gap-4" data-reveal>
+        <div class="grid gap-1">
+          <p class="font-display text-title font-bold">{company.name}</p>
+          <p class="text-sm">
+            {t('experience.role')} · {formatRange(company.start, company.end, locale, present)}
+          </p>
+          <p class="label">{t('experience.projectsCount', { count: String(items.length) })}</p>
+        </div>
+        <p class="flex gap-3 rounded-card border border-dashed border-accent-text p-4 text-sm leading-relaxed text-accent-text">
+          <svg
+            class="mt-0.5 size-4 flex-none"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="4" y="11" width="16" height="10" rx="2"></rect>
+            <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+          </svg>
+          {t('experience.notice')}
+        </p>
+      </div>
+    </header>
+
+    <div class="flex justify-end">
+      <button
+        type="button"
+        class="rounded-full border border-line px-4 py-2 text-sm transition-colors duration-(--duration-fast) hover:border-accent-text hover:text-accent-text"
+        data-expand-all
+        data-label-expand={t('experience.expandAll')}
+        data-label-collapse={t('experience.collapseAll')}
+      >
+        {t('experience.expandAll')}
+      </button>
+    </div>
+
+    <div class="timeline" data-timeline>
+      <span class="track" aria-hidden="true">
+        <span class="fill"></span>
+      </span>
+      <ol class="grid gap-4">
+        {items.map((item, index) => (
+          <li class="node" data-reveal>
+            <p class="when">
+              <span class="block text-fg">{item.range}</span>
+              <span class="label">{item.duration}</span>
+            </p>
+            <span class="dot" aria-hidden="true" />
+            <details class="card" open={index === 0}>
+              <summary>
+                <span class="grid gap-1">
+                  <span class="label lg:hidden">
+                    {item.range} · {item.duration}
+                  </span>
+                  <span class="font-display text-title font-bold">{item.name[locale]}</span>
+                </span>
+                <span class="plus" aria-hidden="true" />
+              </summary>
+              <div class="body">
+                <div class="grid gap-2">
+                  <span class="label">{t('experience.participation')}</span>
+                  <p class="text-sm leading-relaxed text-muted">{item.participation[locale]}</p>
+                </div>
+                <div class="grid gap-2">
+                  <span class="label">{t('experience.stack')}</span>
+                  <ul class="flex flex-wrap gap-1.5">
+                    {item.stack.map((tech) => (
+                      <li class="rounded-full border border-line px-2.5 py-0.5 font-mono text-xs">
+                        {tech}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </details>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .timeline {
+    --line-x: 0.5rem;
+    position: relative;
+  }
+  @media (min-width: 64rem) {
+    .timeline {
+      --line-x: 12rem;
+    }
+  }
+
+  .track {
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: var(--line-x);
+    width: 2px;
+    background: var(--line);
+    border-radius: 2px;
+  }
+  .fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(var(--accent-text), var(--accent));
+    border-radius: inherit;
+    transform-origin: top;
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .fill {
+        animation: draw-line linear both;
+        animation-timeline: view();
+        animation-range: cover 5% cover 60%;
+      }
+    }
+  }
+  @keyframes draw-line {
+    from {
+      transform: scaleY(0);
+    }
+  }
+
+  .node {
+    position: relative;
+    display: grid;
+    padding-left: calc(var(--line-x) + 1.75rem);
+  }
+  @media (min-width: 64rem) {
+    .node {
+      grid-template-columns: calc(var(--line-x) - 2rem) minmax(0, 1fr);
+      column-gap: 4rem;
+      padding-left: 0;
+    }
+  }
+
+  .when {
+    display: none;
+    padding-top: 1.35rem;
+    text-align: right;
+    font-size: 0.875rem;
+  }
+  @media (min-width: 64rem) {
+    .when {
+      display: grid;
+      align-content: start;
+      gap: 0.25rem;
+    }
+  }
+
+  .dot {
+    position: absolute;
+    top: 1.55rem;
+    left: calc(var(--line-x) - 0.5rem + 1px);
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--line);
+    border-radius: 50%;
+    background: var(--bg);
+    transition:
+      transform var(--duration-base) var(--ease-spring),
+      border-color var(--duration-fast),
+      background-color var(--duration-fast);
+  }
+  .node:hover .dot,
+  .node:has(details[open]) .dot {
+    border-color: var(--accent-text);
+    transform: scale(1.3);
+  }
+  .node:has(details[open]) .dot {
+    background: var(--accent);
+  }
+
+  .card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    transition: border-color var(--duration-base);
+  }
+  .card:hover,
+  .card[open] {
+    border-color: color-mix(in srgb, var(--accent-text) 50%, var(--line));
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    cursor: pointer;
+    list-style: none;
+    border-radius: var(--radius-card);
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* "+" that turns into "×" when open. */
+  .plus {
+    position: relative;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    transition:
+      transform var(--duration-base) var(--ease-spring),
+      border-color var(--duration-fast),
+      background-color var(--duration-fast);
+  }
+  .plus::before,
+  .plus::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.75rem;
+    height: 2px;
+    margin: -1px 0 0 -0.375rem;
+    background: currentColor;
+    border-radius: 1px;
+  }
+  .plus::after {
+    transform: rotate(90deg);
+  }
+  summary:hover .plus {
+    border-color: var(--accent-text);
+  }
+  .card[open] .plus {
+    transform: rotate(135deg);
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .body {
+    display: grid;
+    gap: 1rem;
+    padding: 0 1.25rem 1.25rem;
+  }
+
+  /* Animated open/close where the browser can transition to `auto` height. */
+  .card::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size var(--duration-base) var(--ease-out-expo),
+      content-visibility var(--duration-base) allow-discrete;
+  }
+  .card[open]::details-content {
+    block-size: auto;
+  }
+  @supports not selector(::details-content) {
+    .card[open] .body {
+      animation: var(--animate-enter);
+    }
+  }
+</style>
+
+<script>
+  // "Expand all / Collapse all" for the timeline; the label follows the current state.
+  const button = document.querySelector<HTMLButtonElement>('[data-expand-all]');
+  const timeline = document.querySelector('[data-timeline]');
+  if (button && timeline) {
+    const cards = Array.from(timeline.querySelectorAll('details'));
+    const allOpen = () => cards.every((card) => card.open);
+    const sync = () => {
+      button.textContent =
+        (allOpen() ? button.dataset.labelCollapse : button.dataset.labelExpand) ?? '';
+    };
+    button.addEventListener('click', () => {
+      const open = !allOpen();
+      cards.forEach((card) => (card.open = open));
+      sync();
+    });
+    cards.forEach((card) => card.addEventListener('toggle', sync));
+    sync();
+  }
+</script>
